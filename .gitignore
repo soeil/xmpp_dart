@@ -9,3 +9,12 @@ build/
 
 # Directory created by dartdoc
 doc/api/
+.idea/.gitignore
+.idea/markdown-navigator-enh.xml
+.idea/markdown-navigator.xml
+.idea/modules.xml
+.idea/vcs.xml
+.idea/xmpp_dart.iml
+.idea/codeStyles/Project.xml
+.idea/libraries/Dart_Packages.xml
+.idea/libraries/Dart_SDK.xml

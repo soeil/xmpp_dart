@@ -130,12 +130,13 @@ class Connection {
 
   ReconnectionManager reconnectionManager;
 
-  Connection(this.account) {
+  Connection(this.account, {bool enableLog = true}) {
     RosterManager.getInstance(this);
     PresenceManager.getInstance(this);
     MessageHandler.getInstance(this);
     PingManager.getInstance(this);
     reconnectionManager = ReconnectionManager(this);
+    _logXML = enableLog;
   }
 
   void _openStream() {
