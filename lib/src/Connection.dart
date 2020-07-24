@@ -173,7 +173,7 @@ xml:lang='en'
       print("response: ${response1}");
     }
     if (response1.contains("</stream:stream>")) {
-//      close();
+      close();
       return "";
     }
     return response1;
