@@ -11,7 +11,7 @@ import 'package:tuple/tuple.dart';
 //todo check for rfc6121 2.6.2
 //todo add support for jid groups
 class RosterManager {
-  static Map<Connection, RosterManager> instances = Map<Connection, RosterManager>();
+  static Map<Connection, RosterManager> instances = <Connection, RosterManager>{};
 
   static RosterManager getInstance(Connection connection) {
     var manager = instances[connection];
@@ -22,7 +22,7 @@ class RosterManager {
     return manager;
   }
 
-  final Map<String, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas = Map<String, Tuple2<IqStanza, Completer>>();
+  final Map<String, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas = <String, Tuple2<IqStanza, Completer>>{};
 
   final StreamController<List<Buddy>> _rosterController = StreamController<List<Buddy>>.broadcast();
 
@@ -30,11 +30,11 @@ class RosterManager {
     return _rosterController.stream;
   }
 
-  Map<Jid, Buddy> _rosterMap = Map<Jid, Buddy>();
+  final Map<Jid, Buddy> _rosterMap = <Jid, Buddy>{};
 
   Connection _connection;
 
-  void _queryForRoster() {
+  void queryForRoster() {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     var element = XmppElement();
     element.name = 'query';
@@ -72,7 +72,7 @@ class RosterManager {
   }
 
   Future<IqStanzaResult> removeRosterItem(Buddy rosterItem) {
-    var completer = Completer();
+    var completer = Completer<IqStanzaResult>();
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     var queryElement = XmppElement();
     queryElement.name = 'query';
@@ -97,10 +97,10 @@ class RosterManager {
 
   void _connectionStateProcessor(XmppConnectionState state) {
     if (state == XmppConnectionState.Ready) {
-      _queryForRoster();
+      queryForRoster();
     } else if (state == XmppConnectionState.Closed) {
       _rosterMap.clear();
-      _rosterController.add(List());
+      _rosterController.add([]);
     }
   }
 
@@ -137,7 +137,6 @@ class RosterManager {
   void _fireOnRosterListChanged() {
     var rosterList = _rosterMap.values.toList();
     _rosterController.add(rosterList);
-    print('RosterListChanged: ${rosterList}');
   }
 
   void _handleFullRosterResponse(IqStanza stanza) {
@@ -147,8 +146,8 @@ class RosterManager {
       xmppElement.children.forEach((child) {
         if (child.name == 'item') {
           var jid = Jid.fromFullJid(child.getAttribute('jid').value);
-          String name = child.getAttribute('name')?.value;
-          String subscriptionString = child.getAttribute('subscription')?.value;
+          var name = child.getAttribute('name')?.value;
+          var subscriptionString = child.getAttribute('subscription')?.value;
           var buddy = Buddy(jid);
           buddy.name = name;
           buddy.accountJid = _connection.fullJid;

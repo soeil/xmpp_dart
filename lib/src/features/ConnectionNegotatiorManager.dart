@@ -2,116 +2,123 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/BindingResourceNegotiator.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
 import 'package:xmpp_stone/src/features/SessionInitiationNegotiator.dart';
 import 'package:xmpp_stone/src/features/StartTlsNegotatior.dart';
 import 'package:xmpp_stone/src/features/sasl/SaslAuthenticationFeature.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/CarbonsNegotiator.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/Feature.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
 import 'package:xml/xml.dart' as xml;
-import 'package:tuple/tuple.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
 
-class ConnectionNegotatiorManager {
-  List<ConnectionNegotiator> supportedNegotiatorList =
-      List<ConnectionNegotiator>();
-  ConnectionNegotiator activeFeature;
-  Queue<Tuple2<ConnectionNegotiator, Nonza>> waitingNegotiators =
-      Queue<Tuple2<ConnectionNegotiator, Nonza>>();
+import '../elements/nonzas/Nonza.dart';
+import '../logger/Log.dart';
+import 'Negotiator.dart';
+import 'servicediscovery/ServiceDiscoveryNegotiator.dart';
+
+class ConnectionNegotiatorManager {
+  static const String TAG = 'ConnectionNegotiatorManager';
+  List<Negotiator> supportedNegotiatorList = <Negotiator>[];
+  Negotiator activeNegotiator;
+  Queue<NegotiatorWithSupportedNonzas> waitingNegotiators =
+      Queue<NegotiatorWithSupportedNonzas>();
 
   Connection _connection;
+  XmppAccountSettings _accountSettings;
 
-  String _password;
+  StreamSubscription<NegotiatorState> activeSubscription;
 
-  StreamSubscription<NegotiatorState> activeSubscribtion;
-
-  ConnectionNegotatiorManager(Connection connection, String password) {
-    _password = password;
+  ConnectionNegotiatorManager(
+      Connection connection, XmppAccountSettings accountSettings) {
     _connection = connection;
-    _connection.connectionStateStream.listen((state) => {
-          if (state == XmppConnectionState.DoneServiceDiscovery)
-            {_connection.setState(XmppConnectionState.Ready)}
-        });
-    _initSupportedFeaturesList();
+    _accountSettings = accountSettings;
+  }
+
+  void init() {
+    supportedNegotiatorList.clear();
+    _initSupportedNegotiatorList();
+    waitingNegotiators.clear();
   }
 
   void negotiateFeatureList(xml.XmlElement element) {
-    print("Negotating features");
-    List<Nonza> nonzas = element.descendants
+    Log.d(TAG, 'Negotiating features');
+    var nonzas = element.descendants
         .whereType<xml.XmlElement>()
         .map((element) => Nonza.parse(element))
         .toList();
-    //supportedNegotiatorList.sort((a,b) => a.priorityLevel.compareTo(b.priorityLevel));
-    supportedNegotiatorList.forEach((negotiator)  {
-          nonzas.forEach((nonza) {
-                if (negotiator.match(nonza))
-                  {
-                    waitingNegotiators.add(
-                        Tuple2<ConnectionNegotiator, Nonza>(negotiator, nonza));
-                  };
-              });
-        });
-    //nonzas.sort((a, b) => findNonzaPriority(a).compareTo(findNonzaPriority(b)));
-    //nonzas.forEach((feature) => _checkFeature(feature));
-    negotiateNextFeature();
-  }
-
-  void _checkFeature(Nonza nonza) {
-    supportedNegotiatorList.forEach((feature) {
-      if (feature.match(nonza)) {
+    supportedNegotiatorList.forEach((negotiator) {
+      var matchingNonzas = negotiator.match(nonzas);
+      if (matchingNonzas != null && matchingNonzas.isNotEmpty) {
         waitingNegotiators
-            .add(Tuple2<ConnectionNegotiator, Nonza>(feature, nonza));
+            .add(NegotiatorWithSupportedNonzas(negotiator, matchingNonzas));
       }
     });
+    if (_connection.authenticated) {
+      waitingNegotiators.add(NegotiatorWithSupportedNonzas(
+          ServiceDiscoveryNegotiator.getInstance(_connection), []));
+    }
+    negotiateNextFeature();
   }
 
   void cleanNegotiators() {
     waitingNegotiators.clear();
-    if (activeFeature != null) {
-      activeFeature.backToIdle();
-      activeFeature = null;
+    if (activeNegotiator != null) {
+      activeNegotiator.backToIdle();
+      activeNegotiator = null;
     }
-    if (activeSubscribtion != null) {
-      activeSubscribtion.cancel();
+    if (activeSubscription != null) {
+      activeSubscription.cancel();
     }
   }
 
   void negotiateNextFeature() {
-    Tuple2<ConnectionNegotiator, Nonza> tuple = pickNextNegotatiator();
-    if (tuple != null) {
-      activeFeature = tuple.item1;
-      activeFeature.negotiate(tuple.item2);
+    var negotiatorWithData = pickNextNegotiator();
+    if (negotiatorWithData != null) {
+      activeNegotiator = negotiatorWithData.negotiator;
+      activeNegotiator.negotiate(negotiatorWithData.supportedNonzas);
       //TODO: this should be refactored
-      if (activeSubscribtion != null) activeSubscribtion.cancel();
-      activeSubscribtion =
-          activeFeature.featureStateStream.listen(stateListener);
+      if (activeSubscription != null) activeSubscription.cancel();
+      if (activeNegotiator != null) {
+        Log.d(TAG, 'ACTIVE FEATURE: ${negotiatorWithData.negotiator}');
+      }
+
+        activeSubscription =
+            activeNegotiator.featureStateStream.listen(stateListener);
     } else {
-      activeFeature = null;
+      activeNegotiator = null;
       _connection.doneParsingFeatures();
     }
   }
 
-  void _initSupportedFeaturesList() {
-    StreamManagementModule streamManagementModule =
-        StreamManagementModule.getInstance(_connection);
+  void _initSupportedNegotiatorList() {
+    var streamManagement = StreamManagementModule.getInstance(_connection);
+    streamManagement.reset();
     supportedNegotiatorList.add(StartTlsNegotiator(_connection)); //priority 1
     supportedNegotiatorList
-        .add(SaslAuthenticationFeature(_connection, _password));
-    if (streamManagementModule.isResumeAvailable()) {
-      supportedNegotiatorList.add(streamManagementModule);
+        .add(SaslAuthenticationFeature(_connection, _accountSettings.password));
+    if (streamManagement.isResumeAvailable()) {
+      supportedNegotiatorList.add(streamManagement);
     }
     supportedNegotiatorList
         .add(BindingResourceConnectionNegotiator(_connection));
     supportedNegotiatorList
-        .add(streamManagementModule); //doesn't care if success it will be done
+        .add(streamManagement); //doesn't care if success it will be done
     supportedNegotiatorList.add(SessionInitiationNegotiator(_connection));
-    supportedNegotiatorList.add(ServiceDiscoveryNegotiator.getInstance(_connection));
+    // supportedNegotiatorList
+    //     .add(ServiceDiscoveryNegotiator.getInstance(_connection));
+    supportedNegotiatorList.add(CarbonsNegotiator.getInstance(_connection));
+    supportedNegotiatorList.add(MAMNegotiator.getInstance(_connection));
+
   }
 
   void stateListener(NegotiatorState state) {
     if (state == NegotiatorState.NEGOTIATING) {
-      print("Feature Started Parsing");
+      Log.d(TAG, 'Feature Started Parsing');
     } else if (state == NegotiatorState.DONE_CLEAN_OTHERS) {
       cleanNegotiators();
     } else if (state == NegotiatorState.DONE) {
@@ -119,27 +126,37 @@ class ConnectionNegotatiorManager {
     }
   }
 
-  int findNonzaPriority(Nonza nonza) {
-    var feature = supportedNegotiatorList
-        .firstWhere((feature) => feature.match(nonza), orElse: () => null);
-    if (feature == null) {
-      return ConnectionNegotiator.defaultPriorityLevel;
-    } else {
-      return feature.priorityLevel;
-    }
+  NegotiatorWithSupportedNonzas pickNextNegotiator() {
+    if (waitingNegotiators.isEmpty) return null;
+    var negotiatorWithData = waitingNegotiators.firstWhere((element) {
+      Log.d(TAG,
+          'Found matching negotiator ${element.negotiator.isReady().toString()}');
+      return element.negotiator.isReady();
+    }, orElse: () {
+      Log.d(TAG, 'No matching negotiator');
+      return null;
+    });
+    waitingNegotiators.remove(negotiatorWithData);
+    return negotiatorWithData;
   }
 
-  Tuple2<ConnectionNegotiator, Nonza> pickNextNegotatiator() {
-    if (waitingNegotiators.isEmpty) return null;
-    waitingNegotiators.forEach((it) => it.toString());
-    Tuple2<ConnectionNegotiator, Nonza> element = waitingNegotiators.firstWhere((element) {
-      print("ELEMENT " + element.item1.isReady().toString());
-      return element.item1.isReady();
-    }, orElse: ()  {
-      print("No elements");
-      waitingNegotiators.forEach((it) => it.toString());
+  void addFeatures(List<Feature> supportedFeatures) {
+    Log.e(TAG,
+        'ADDING FEATURES count: ${supportedFeatures.length} ${supportedFeatures} ');
+    supportedNegotiatorList.forEach((negotiator) {
+      var matchingNonzas = negotiator.match(supportedFeatures);
+      if (matchingNonzas != null && matchingNonzas.isNotEmpty) {
+        Log.d(TAG, 'Adding negotiator: ${negotiator} ${matchingNonzas}');
+        waitingNegotiators
+            .add(NegotiatorWithSupportedNonzas(negotiator, matchingNonzas));
+      }
     });
-    waitingNegotiators.remove(element);
-    return element;
   }
+}
+
+class NegotiatorWithSupportedNonzas {
+  Negotiator negotiator;
+  List<Nonza> supportedNonzas;
+
+  NegotiatorWithSupportedNonzas(this.negotiator, this.supportedNonzas);
 }
