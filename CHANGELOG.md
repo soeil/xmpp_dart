@@ -1,3 +1,9 @@
+## 0.3.3
+- bug fixing
+
+## 0.3.2
+- bug fixing
+
 ## 0.3.1
 - bug fixing
 
@@ -33,7 +39,7 @@
 
 ## 0.2.1
 
-Introducing optional parameter for domain name in account settings 
+Introducing optional parameter for domain name in account settings
 
 ## 0.2.0
 

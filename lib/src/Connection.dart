@@ -189,7 +189,7 @@ xml:lang='en'
 
   void connect() {
     if (_state == XmppConnectionState.Closing) {
-      _state == XmppConnectionState.WouldLikeToOpen;
+      _state = XmppConnectionState.WouldLikeToOpen;
     }
     if (_state == XmppConnectionState.Closed) {
       _state = XmppConnectionState.Idle;
