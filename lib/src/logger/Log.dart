@@ -5,32 +5,36 @@ class Log {
 
   static bool logXmpp = true;
 
+  Log(String tag, String message) {
+    v(tag, message);
+  }
+
   static void v(String tag, String message) {
-    if (logLevel.index <= LogLevel.VERBOSE.index) {
+    if (logLevel.index <= LogLevel.VERBOSE.index && logXmpp) {
       log('V/[$tag]: $message');
     }
   }
 
   static void d(String tag, String message) {
-    if (logLevel.index <= LogLevel.DEBUG.index) {
+    if (logLevel.index <= LogLevel.DEBUG.index && logXmpp) {
       log('D/[$tag]: $message');
     }
   }
 
   static void i(String tag, String message) {
-    if (logLevel.index <= LogLevel.INFO.index) {
+    if (logLevel.index <= LogLevel.INFO.index && logXmpp) {
       log('I/[$tag]: $message');
     }
   }
 
   static void w(String tag, String message) {
-    if (logLevel.index <= LogLevel.WARNING.index) {
+    if (logLevel.index <= LogLevel.WARNING.index && logXmpp) {
       log('W/[$tag]: $message');
     }
   }
 
   static void e(String tag, String message) {
-    if (logLevel.index <= LogLevel.ERROR.index) {
+    if (logLevel.index <= LogLevel.ERROR.index && logXmpp) {
       log('E/[$tag]: $message');
     }
   }
@@ -48,7 +52,6 @@ class Log {
       log('$message');
     }
   }
-
 }
 
 enum LogLevel { VERBOSE, DEBUG, INFO, WARNING, ERROR, OFF }

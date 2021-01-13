@@ -142,7 +142,7 @@ class Connection {
     PingManager.getInstance(this);
     connectionNegotatiorManager = ConnectionNegotiatorManager(this, account);
     reconnectionManager = ReconnectionManager(this);
-    _logXML = enableLog;
+    Log.logXmpp = enableLog;
   }
 
   void _openStream() {
