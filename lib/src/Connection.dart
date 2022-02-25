@@ -282,9 +282,11 @@ xml:lang='en'
     }
 
     if (fullResponse != null && fullResponse.isNotEmpty) {
-      xml.XmlNode xmlResponse;
+      xml.XmlNode? xmlResponse;
       try {
-        xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild;
+        if (xml.XmlDocument.parse(fullResponse).firstChild != null) {
+          xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild!;
+        }
       } catch (e) {
         _unparsedXmlResponse += fullResponse.substring(
             0, fullResponse.length - 13); //remove  xmpp_stone end tag
@@ -294,25 +296,25 @@ xml:lang='en'
 //        Log.d("element: " + element.name.local);
 //      });
       //TODO: Improve parser for children only
-      xmlResponse.descendants
+      xmlResponse?.descendants
           .whereType<xml.XmlElement>()
           .where((element) => startMatcher(element))
           .forEach((element) => processInitialStream(element));
 
-      xmlResponse.children
+      xmlResponse?.children
           .whereType<xml.XmlElement>()
           .where((element) => stanzaMatcher(element))
           .map((xmlElement) => StanzaParser.parseStanza(xmlElement))
           .forEach((stanza) => stanza != null ?_inStanzaStreamController.add(stanza) : null);
 
-      xmlResponse.descendants
+      xmlResponse?.descendants
           .whereType<xml.XmlElement>()
           .where((element) => featureMatcher(element))
           .forEach((feature) =>
               connectionNegotatiorManager.negotiateFeatureList(feature));
 
       //TODO: Probably will introduce bugs!!!
-      xmlResponse.children
+      xmlResponse?.children
           .whereType<xml.XmlElement>()
           .where((element) => nonzaMatcher(element))
           .map((xmlElement) => Nonza.parse(xmlElement))
@@ -405,8 +407,7 @@ xml:lang='en'
     var list = element.attributes.firstWhere(
         (attr) =>
             attr.name.local == attribute.name.local &&
-            attr.value == attribute.value,
-        orElse: () => null);
+            attr.value == attribute.value);
     return list != null;
   }
 

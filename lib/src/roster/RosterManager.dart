@@ -40,7 +40,7 @@ class RosterManager {
     element.name = 'query';
     element.addAttribute(XmppAttribute('xmlns', 'jabber:iq:roster'));
     iqStanza.addChild(element);
-    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, null);
+    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, Completer());
     _connection.writeStanza(iqStanza);
   }
 

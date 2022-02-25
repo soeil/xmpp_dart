@@ -128,7 +128,9 @@ class VCard extends XmppElement {
     var base64Image = getChild('PHOTO').getChild('BINVAL').textValue;
     if (base64Image != null) {
       _imageData = base64.decode(base64Image);
-      _image = img.decodeImage(_imageData);
+      if (img.decodeImage(_imageData) != null) {
+        _image = img.decodeImage(_imageData)!;
+      }
     }
   }
 }
