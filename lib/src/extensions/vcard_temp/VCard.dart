@@ -5,9 +5,9 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 
 class VCard extends XmppElement {
-  var _imageData;
+  late var _imageData;
 
-  img.Image _image;
+  late img.Image _image;
 
   VCard(XmppElement element) {
     if (element != null) {
@@ -18,39 +18,39 @@ class VCard extends XmppElement {
     _parseImage();
   }
 
-  String get fullName => getChild('FN')?.textValue;
+  String? get fullName => getChild('FN').textValue;
 
-  String get familyName => getChild('N')?.getChild('FAMILY')?.textValue;
+  String? get familyName => getChild('N')?.getChild('FAMILY')?.textValue;
 
-  String get givenName => getChild('N')?.getChild('GIVEN')?.textValue;
+  String? get givenName => getChild('N')?.getChild('GIVEN')?.textValue;
 
-  String get prefixName => getChild('N')?.getChild('PREFIX')?.textValue;
+  String? get prefixName => getChild('N')?.getChild('PREFIX')?.textValue;
 
-  String get nickName => getChild('NICKNAME')?.textValue;
+  String? get nickName => getChild('NICKNAME')?.textValue;
 
-  String get url => getChild('URL')?.textValue;
+  String? get url => getChild('URL')?.textValue;
 
-  String get bDay => getChild('BDAY')?.textValue;
+  String? get bDay => getChild('BDAY')?.textValue;
 
-  String get organisationName =>
+  String? get organisationName =>
       getChild('ORG')?.getChild('ORGNAME')?.textValue;
 
-  String get organizationUnit =>
-      getChild('ORG')?.getChild('ORGUNIT')?.textValue;
+  String? get organizationUnit =>
+      getChild('ORG').getChild('ORGUNIT').textValue;
 
-  String get title => getChild('TITLE')?.textValue;
+  String? get title => getChild('TITLE').textValue;
 
-  String get role => getChild('ROLE')?.textValue;
+  String? get role => getChild('ROLE').textValue;
 
-  String get jabberId => getChild('JABBERID')?.textValue;
+  String? get jabberId => getChild('JABBERID').textValue;
 
-  String getItem(String itemName) => getChild(itemName)?.textValue;
+  String? getItem(String itemName) => getChild(itemName).textValue;
 
   dynamic get imageData => _imageData;
 
   img.Image get image => _image;
 
-  String get imageType => getChild('PHOTO')?.getChild('TYPE')?.textValue;
+  String? get imageType => getChild('PHOTO').getChild('TYPE').textValue;
 
   List<PhoneItem> get phones {
     var homePhones = <PhoneItem>[];
@@ -59,11 +59,10 @@ class VCard extends XmppElement {
             (element.name == 'TEL' && element.getChild('HOME') != null))
         .forEach((element) {
       var typeString = element.children.firstWhere(
-          (element) => (element.name != 'HOME' && element.name != 'NUMBER'),
-          orElse: () => null);
+          (element) => (element.name != 'HOME' && element.name != 'NUMBER'));
       if (typeString != null) {
         var type = getPhoneTypeFromString(typeString.name);
-        var number = element.getChild('NUMBER')?.textValue;
+        var number = element.getChild('NUMBER').textValue;
         if (number != null) {
           homePhones.add(PhoneItem(type, number));
         }
@@ -72,20 +71,18 @@ class VCard extends XmppElement {
     return homePhones;
   }
 
-  String get emailHome {
+  String? get emailHome {
     var element = children.firstWhere(
         (element) =>
-            (element.name == 'EMAIL' && element.getChild('HOME') != null),
-        orElse: () => null);
-    return element?.getChild('USERID')?.textValue;
+            (element.name == 'EMAIL' && element.getChild('HOME') != null));
+    return element.getChild('USERID').textValue;
   }
 
-  String get emailWork {
+  String? get emailWork {
     var element = children.firstWhere(
         (element) =>
-            (element.name == 'EMAIL' && element.getChild('WORK') != null),
-        orElse: () => null);
-    return element?.getChild('USERID')?.textValue;
+            (element.name == 'EMAIL' && element.getChild('WORK') != null));
+    return element.getChild('USERID').textValue;
   }
 
   static PhoneType getPhoneTypeFromString(String phoneTypeString) {
@@ -128,7 +125,7 @@ class VCard extends XmppElement {
   }
 
   void _parseImage() {
-    var base64Image = getChild('PHOTO')?.getChild('BINVAL')?.textValue;
+    var base64Image = getChild('PHOTO').getChild('BINVAL').textValue;
     if (base64Image != null) {
       _imageData = base64.decode(base64Image);
       _image = img.decodeImage(_imageData);

@@ -8,12 +8,12 @@ import 'package:xmpp_stone/src/features/sasl/ScramSaslHandler.dart';
 import '../../elements/nonzas/Nonza.dart';
 
 class SaslAuthenticationFeature extends Negotiator {
-  Connection _connection;
+  late Connection _connection;
 
   final Set<SaslMechanism> _offeredMechanisms = <SaslMechanism>{};
   final Set<SaslMechanism> _supportedMechanisms = <SaslMechanism>{};
 
-  String _password;
+  late String _password;
 
   SaslAuthenticationFeature(Connection connection, String password) {
     _password = password;
@@ -27,7 +27,7 @@ class SaslAuthenticationFeature extends Negotiator {
   // improve this
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhere((element) => element.name == 'mechanisms', orElse: () => null);
+    Nonza? nonza = requests.firstWhere((element) => element.name == 'mechanisms');
     return nonza != null? [nonza] : [];
   }
 
@@ -43,7 +43,7 @@ class SaslAuthenticationFeature extends Negotiator {
     var mechanism = _supportedMechanisms.firstWhere(
         (mch) => _offeredMechanisms.contains(mch),
         orElse: _handleAuthNotSupported);
-    AbstractSaslHandler saslHandler;
+    AbstractSaslHandler? saslHandler;
     switch (mechanism) {
       case SaslMechanism.PLAIN:
         saslHandler = PlainSaslHandler(_connection, _password);

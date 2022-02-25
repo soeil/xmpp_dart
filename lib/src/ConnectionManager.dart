@@ -1,5 +1,5 @@
 class ConnectionManager {
-  static ConnectionManager _instance;
+  static late ConnectionManager _instance;
 
   static ConnectionManager getInstance() {
     _instance ??= ConnectionManager();

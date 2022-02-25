@@ -21,15 +21,15 @@ class Message {
   DateTime _time;
 
   //TODO: check purpose vs stanza_id
-  String _messageId;
-  String _stanzaId;
-  String _threadId;
-  String _queryId; //To be determined if needed
-  bool _isDelayed;
-  bool _isForwarded;
-  MessageStanzaType _type;
+  String _messageId = '';
+  String _stanzaId = '';
+  String _threadId = '';
+  String _queryId = ''; //To be determined if needed
+  bool _isDelayed = false;
+  bool _isForwarded = false;
+  MessageStanzaType? _type;
 
-  ChatState _chatState; // optional element
+  late ChatState _chatState; // optional element
 
   String get messageId => _messageId;
 
@@ -37,25 +37,27 @@ class Message {
       {String stanzaId = '',
       String threadId = '',
       bool isForwarded = false,
-      bool isDelayed,
-      String queryId,
-      String messageId,
-      MessageStanzaType type,
-      ChatState chatState}) {
+      bool? isDelayed,
+      String? queryId,
+      String? messageId,
+      MessageStanzaType? type,
+      ChatState? chatState}) {
     _stanzaId = stanzaId;
     _threadId = threadId;
     _isForwarded = isForwarded;
-    _isDelayed = isDelayed;
-    _queryId = queryId;
-    _messageId = messageId;
+    _isDelayed = isDelayed ?? false;
+    _queryId = queryId = '';
+    _messageId = messageId ?? '';
     _type = type;
-    _chatState = chatState;
+    if (chatState != null) {
+      _chatState = chatState;
+    }
   }
 
   ChatState get chatState => _chatState;
 
   static Message fromStanza(MessageStanza stanza) {
-    Message message;
+    Message? message;
     var isCarbon = stanza.children.any(
         (element) => (element.name == 'sent' || element.name == 'received'));
     var isArchivedMessage =
@@ -69,21 +71,20 @@ class Message {
     return message;
   }
 
-  static Message _parseCarbon(MessageStanza stanza) {
+  static Message? _parseCarbon(MessageStanza stanza) {
     var carbon = stanza.children.firstWhere(
-        (element) => (element.name == 'sent' || element.name == 'received'),
-        orElse: () => null);
+        (element) => (element.name == 'sent' || element.name == 'received'),);
     try {
       var forwarded = carbon.getChild('forwarded');
       if (forwarded != null) {
         var message = forwarded.getChild('message');
         if (message != null) {
-          var to = Jid.fromFullJid(message.getAttribute('to')?.value);
-          var from = Jid.fromFullJid(message.getAttribute('from')?.value);
-          var body = message.getChild('body')?.textValue;
+          var to = Jid.fromFullJid(message.getAttribute('to').value ?? '');
+          var from = Jid.fromFullJid(message.getAttribute('from').value ?? '');
+          var body = message.getChild('body').textValue;
           var type = (_parseType(message));
           var chatState = _parseState(message);
-          var threadId = message.getChild('thread')?.textValue;
+          var threadId = message.getChild('thread').textValue;
           var dateTime = _parseDelayed(forwarded);
           var delayed = dateTime != null;
           dateTime ??= DateTime.now();
@@ -101,22 +102,21 @@ class Message {
     return null;
   }
 
-  static Message _parseArchived(MessageStanza stanza) {
+  static Message? _parseArchived(MessageStanza stanza) {
     var result = stanza.children.firstWhere(
-        (element) => (element.name == 'result'),
-        orElse: () => null);
+        (element) => (element.name == 'result'),);
     try {
-      var queryId = result?.getAttribute('queryId')?.value;
+      var queryId = result.getAttribute('queryId').value;
       var forwarded = result.getChild('forwarded');
       if (forwarded != null) {
         var message = forwarded.getChild('message');
         if (message != null) {
-          var to = Jid.fromFullJid(message.getAttribute('to')?.value);
-          var from = Jid.fromFullJid(message.getAttribute('from')?.value);
-          var body = message.getChild('body')?.textValue;
-          var threadId = message.getChild('thread')?.textValue;
+          var to = Jid.fromFullJid(message.getAttribute('to').value);
+          var from = Jid.fromFullJid(message.getAttribute('from').value);
+          var body = message.getChild('body').textValue;
+          var threadId = message.getChild('thread').textValue;
           var stanzaId =
-              message.getChild('stanza-id')?.getAttribute('id')?.value;
+              message.getChild('stanza-id').getAttribute('id').value;
           var type = (_parseType(message));
           var dateTime = _parseDelayed(forwarded);
           dateTime ??= DateTime.now();
@@ -138,9 +138,9 @@ class Message {
     return null;
   }
 
-  static MessageStanzaType _parseType(XmppElement element) {
+  static MessageStanzaType? _parseType(XmppElement element) {
     var typeString = element.getAttribute('type');
-    MessageStanzaType type;
+    MessageStanzaType? type;
     if (typeString == null) {
       Log.w(TAG, 'No type found for iq stanza');
     } else {
@@ -165,12 +165,11 @@ class Message {
     return type;
   }
 
-  static ChatState _parseState(XmppElement element) {
+  static ChatState? _parseState(XmppElement element) {
     var stateElement = element.children.firstWhere(
         (element) =>
-            element.getAttribute('xmlns')?.value ==
-            'http://jabber.org/protocol/chatstates',
-        orElse: () => null);
+            element.getAttribute('xmlns').value ==
+            'http://jabber.org/protocol/chatstates',);
     if (stateElement != null) {
       return _stateFromString(stateElement.name);
     } else {
@@ -202,7 +201,7 @@ class Message {
         type: _parseType(stanza));
   }
 
-  static DateTime _parseDelayed(XmppElement element) {
+  static DateTime? _parseDelayed(XmppElement element) {
     var delayed = element.getChild('delay');
     if (delayed != null) {
       var stamped = delayed.getAttribute('stamp').value;
@@ -250,5 +249,5 @@ class Message {
 
   bool get isForwarded => _isForwarded;
 
-  MessageStanzaType get type => _type;
+  MessageStanzaType? get type => _type;
 }

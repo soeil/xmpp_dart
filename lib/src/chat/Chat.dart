@@ -18,11 +18,11 @@ class ChatImpl implements Chat {
 
   @override
   Jid get jid => _jid;
-  ChatState _myState;
+  late ChatState _myState;
   @override
   ChatState get myState => _myState;
 
-  ChatState _remoteState;
+  late ChatState _remoteState;
   @override
   ChatState get remoteState => _remoteState;
 
@@ -90,7 +90,7 @@ abstract class Chat {
   ChatState get remoteState;
   Stream<Message> get newMessageStream;
   Stream<ChatState> get remoteStateStream;
-  List<Message> messages;
+  List<Message> messages = [];
   void sendMessage(String text);
   set myState(ChatState state);
 }

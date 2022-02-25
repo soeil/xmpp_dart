@@ -10,8 +10,8 @@ import '../logger/Log.dart';
 
 class StartTlsNegotiator extends Negotiator {
   static const TAG = 'StartTlsNegotiator';
-  Connection _connection;
-  StreamSubscription<Nonza> subscription;
+  late Connection _connection;
+  StreamSubscription<Nonza>? subscription;
 
   StartTlsNegotiator(Connection connection) {
     _connection = connection;
@@ -34,7 +34,7 @@ class StartTlsNegotiator extends Negotiator {
     if (nonza.name == 'proceed') {
       _connection.startSecureSocket();
       state = NegotiatorState.DONE_CLEAN_OTHERS;
-      subscription.cancel();
+      subscription?.cancel();
     } else if (nonza.name == 'failure') {
       _connection.startTlsFailed();
     }
@@ -45,8 +45,7 @@ class StartTlsNegotiator extends Negotiator {
     var nonza = requests.firstWhere(
         (request) =>
             request.name == 'starttls' &&
-            request.getAttribute('xmlns')?.value == expectedNameSpace,
-        orElse: () => null);
+            request.getAttribute('xmlns')?.value == expectedNameSpace);
     return nonza != null ? [nonza] : [];
   }
 }

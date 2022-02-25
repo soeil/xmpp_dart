@@ -32,7 +32,7 @@ class RosterManager {
 
   final Map<Jid, Buddy> _rosterMap = <Jid, Buddy>{};
 
-  Connection _connection;
+  late Connection _connection;
 
   void queryForRoster() {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
@@ -107,12 +107,14 @@ class RosterManager {
   void _processStanza(AbstractStanza stanza) {
     if (stanza is IqStanza) {
       var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
-      if (_myUnrespondedIqStanzas[stanza.id] != null) {
+      if (unrespondedStanza != null) {
         if (stanza.type == IqStanzaType.RESULT) {
           if (_isFullJidRequest(unrespondedStanza.item1)) {
             _handleFullRosterResponse(stanza);
           } else if (_isRosterSet(stanza)) {
-            _handleRosterSetSuccessResponse(unrespondedStanza);
+            if (unrespondedStanza != null) {
+              _handleRosterSetSuccessResponse(unrespondedStanza);
+            }
           }
         } else if (stanza.type == IqStanzaType.SET) {
           //it is roster push event
@@ -146,12 +148,14 @@ class RosterManager {
       xmppElement.children.forEach((child) {
         if (child.name == 'item') {
           var jid = Jid.fromFullJid(child.getAttribute('jid').value);
-          var name = child.getAttribute('name')?.value;
-          var subscriptionString = child.getAttribute('subscription')?.value;
+          var name = child.getAttribute('name').value;
+          var subscriptionString = child.getAttribute('subscription').value;
           var buddy = Buddy(jid);
           buddy.name = name;
           buddy.accountJid = _connection.fullJid;
-          buddy.subscriptionType = Buddy.typeFromString(subscriptionString);
+          if (Buddy.typeFromString(subscriptionString) != null) {
+            buddy.subscriptionType = Buddy.typeFromString(subscriptionString)!;
+          }
           _rosterMap[jid] = buddy;
         }
       });

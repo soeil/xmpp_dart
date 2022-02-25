@@ -6,13 +6,21 @@ class XmppAccountSettings {
   String domain;
   String resource = '';
   String password;
-  String host;
+  String? host;
   int port;
   int totalReconnections = 3;
   int reconnectionTimeout = 1000;
   bool ackEnabled = true;
 
-  XmppAccountSettings(this.name, this.username, this.domain, this.password, this.port, {this.host, this.resource} );
+  XmppAccountSettings(
+    this.name,
+    this.username,
+    this.domain,
+    this.password,
+    this.port, {
+    this.host,
+    this.resource = '',
+  });
 
   Jid get fullJid => Jid(username, domain, resource);
 

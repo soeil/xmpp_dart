@@ -53,8 +53,8 @@ class Jid {
     var exp = RegExp(r'^((.*?)@)?([^/@]+)(/(.*))?$');
     Iterable<Match> matches = exp.allMatches(fullJid);
     var match = matches.first;
-    if (match != null) {
-      return Jid(match[2], match[3], match[5]);
+    if (match != null && match[2] != null && match[3] != null && match[5] != null) {
+      return Jid(match[2]!, match[3]!, match[5]!);
     } else {
       return InvalidJid();
     }

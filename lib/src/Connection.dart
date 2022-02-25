@@ -50,17 +50,17 @@ class Connection {
 
   XmppAccountSettings account;
 
-  StreamManagementModule streamManagementModule;
+  late StreamManagementModule streamManagementModule;
 
   Jid get serverName {
     if (_serverName != null) {
-      return Jid.fromFullJid(_serverName);
+      return Jid.fromFullJid(_serverName!);
     } else {
       return Jid.fromFullJid(fullJid.domain); //todo move to account.domain!
     }
   } //move this somewhere
 
-  String _serverName;
+  String? _serverName;
 
   static Connection getInstance(XmppAccountSettings account) {
     var connection = instances[account.fullJid.userAtDomain];
@@ -71,7 +71,7 @@ class Connection {
     return connection;
   }
 
-  String _errorMessage;
+  String _errorMessage = '';
 
   String get errorMessage => _errorMessage;
 
@@ -118,13 +118,13 @@ class Connection {
 
   Jid get fullJid => account.fullJid;
 
-  ConnectionNegotiatorManager connectionNegotatiorManager;
+  late ConnectionNegotiatorManager connectionNegotatiorManager;
 
   void fullJidRetrieved(Jid jid) {
     account.resource = jid.resource;
   }
 
-  Socket _socket;
+  Socket? _socket;
 
   // for testing purpose
   set socket(Socket value) {
@@ -133,7 +133,7 @@ class Connection {
 
   XmppConnectionState _state = XmppConnectionState.Idle;
 
-  ReconnectionManager reconnectionManager;
+  late ReconnectionManager reconnectionManager;
 
   Connection(this.account, {bool enableLog = true}) {
     RosterManager.getInstance(this);
@@ -236,7 +236,7 @@ xml:lang='en'
       if (_socket != null) {
         try {
           setState(XmppConnectionState.Closing);
-          _socket.write('</stream:stream>');
+          _socket?.write('</stream:stream>');
         } on Exception {
           Log.d(TAG, 'Socket already closed');
         }
@@ -303,7 +303,7 @@ xml:lang='en'
           .whereType<xml.XmlElement>()
           .where((element) => stanzaMatcher(element))
           .map((xmlElement) => StanzaParser.parseStanza(xmlElement))
-          .forEach((stanza) => _inStanzaStreamController.add(stanza));
+          .forEach((stanza) => stanza != null ?_inStanzaStreamController.add(stanza) : null);
 
       xmlResponse.descendants
           .whereType<xml.XmlElement>()
@@ -338,7 +338,7 @@ xml:lang='en'
   void write(message) {
     Log.xmppp_sending(message);
     if (isOpened()) {
-      _socket.write(message);
+      _socket?.write(message);
     }
   }
 
@@ -376,11 +376,13 @@ xml:lang='en'
 
   void startSecureSocket() {
     Log.d(TAG, 'startSecureSocket');
-    SecureSocket.secure(_socket, onBadCertificate: _validateBadCertificate)
+    if (_socket == null) {
+      return;
+    }
+    SecureSocket.secure(_socket!, onBadCertificate: _validateBadCertificate)
         .then((secureSocket) {
       _socket = secureSocket;
-      _socket
-          .cast<List<int>>()
+      _socket?.cast<List<int>>()
           .transform(utf8.decoder)
           .map(prepareStreamResponse)
           .listen(handleResponse,

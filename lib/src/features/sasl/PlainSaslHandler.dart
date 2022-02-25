@@ -8,11 +8,11 @@ import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
 
 class PlainSaslHandler implements AbstractSaslHandler {
-  Connection _connection;
-  StreamSubscription<Nonza> subscription;
+  late Connection _connection;
+  StreamSubscription<Nonza>? subscription;
   final _completer = Completer<AuthenticationResult>();
 
-  String _password;
+  late String _password;
 
   PlainSaslHandler(Connection connection, String password) {
     _password = password;
@@ -28,11 +28,11 @@ class PlainSaslHandler implements AbstractSaslHandler {
 
   void _parseAnswer(Nonza nonza) {
     if (nonza.name == 'failure') {
-      subscription.cancel();
+      subscription?.cancel();
       _completer.complete(
           AuthenticationResult(false, 'Invalid username or password'));
     } else if (nonza.name == 'success') {
-      subscription.cancel();
+      subscription?.cancel();
       _completer.complete(AuthenticationResult(true, ''));
     }
   }
