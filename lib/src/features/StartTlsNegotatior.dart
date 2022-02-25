@@ -42,11 +42,15 @@ class StartTlsNegotiator extends Negotiator {
 
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhere(
-        (request) =>
-            request.name == 'starttls' &&
-            request.getAttribute('xmlns')?.value == expectedNameSpace);
-    return nonza != null ? [nonza] : [];
+    try {
+      Nonza? nonza = requests.firstWhere(
+              (request) =>
+          request.name == 'starttls' &&
+              request.getAttribute('xmlns')?.value == expectedNameSpace);
+      return [nonza];
+    } catch(e) {
+      return [];
+    }
   }
 }
 

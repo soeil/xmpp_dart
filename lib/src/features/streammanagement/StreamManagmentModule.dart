@@ -16,11 +16,9 @@ import '../../../xmpp_stone.dart';
 import '../Negotiator.dart';
 
 class StreamManagementModule extends Negotiator {
-
   static const TAG = 'StreamManagementModule';
 
-  static Map<Connection, StreamManagementModule> instances =
-      <Connection, StreamManagementModule>{};
+  static Map<Connection, StreamManagementModule> instances = <Connection, StreamManagementModule>{};
 
   static StreamManagementModule getInstance(Connection connection) {
     var module = instances[connection];
@@ -40,8 +38,7 @@ class StreamManagementModule extends Negotiator {
   bool ackTurnedOn = true;
   Timer? timer;
 
-  final StreamController<AbstractStanza> _deliveredStanzasStreamController =
-      StreamController.broadcast();
+  final StreamController<AbstractStanza> _deliveredStanzasStreamController = StreamController.broadcast();
 
   Stream<AbstractStanza> get deliveredStanzasStream {
     return _deliveredStanzasStreamController.stream;
@@ -58,8 +55,7 @@ class StreamManagementModule extends Negotiator {
     var shouldStay = streamState.lastSentStanza - lastDeliveredStanza;
     if (shouldStay < 0) shouldStay = 0;
     while (streamState.nonConfirmedSentStanzas.length > shouldStay) {
-      var stanza =
-          streamState.nonConfirmedSentStanzas.removeFirst() as AbstractStanza;
+      var stanza = streamState.nonConfirmedSentStanzas.removeFirst() as AbstractStanza;
       if (ackTurnedOn) {
         _deliveredStanzasStreamController.add(stanza);
       }
@@ -77,21 +73,27 @@ class StreamManagementModule extends Negotiator {
     ackTurnedOn = connection.account.ackEnabled;
     expectedName = 'StreamManagementModule';
     _connection.connectionStateStream.listen((state) {
-          if (state == XmppConnectionState.Reconnecting) {
-            backToIdle();
-          }
-          if (!(_connection.isOpened()) && timer != null) {timer!.cancel();};
-          if (state == XmppConnectionState.Closed) {
-            streamState = StreamState();
-            //state = XmppConnectionState.Idle;
-          }
-        });
+      if (state == XmppConnectionState.Reconnecting) {
+        backToIdle();
+      }
+      if (!(_connection.isOpened()) && timer != null) {
+        timer!.cancel();
+      }
+      ;
+      if (state == XmppConnectionState.Closed) {
+        streamState = StreamState();
+        //state = XmppConnectionState.Idle;
+      }
+    });
   }
 
   @override
   List<Nonza> match(List<Nonza> requests) {
-  var nonza = requests.firstWhere((request) => SMNonza.match(request));
-  return nonza != null ? [nonza] : [];
+    var nonza;
+    try {
+      nonza = requests.firstWhere((request) => SMNonza.match(request));
+    } catch (e) {}
+    return nonza != null ? [nonza] : [];
   }
 
   //TODO: Improve
@@ -133,7 +135,7 @@ class StreamManagementModule extends Negotiator {
       }
     } else if (state == NegotiatorState.DONE) {
       if (ANonza.match(nonza)) {
-        parseAckResponse(nonza.getAttribute('h').value);
+        parseAckResponse(nonza.getAttribute('h')?.value ?? '');
       } else if (RNonza.match(nonza)) {
         sendAckResponse();
       }
@@ -154,39 +156,34 @@ class StreamManagementModule extends Negotiator {
     var resume = nonza.getAttribute('resume');
     if (resume != null && resume.value == 'true') {
       streamState.streamResumeEnabled = true;
-      streamState.id = nonza.getAttribute('id').value;
+      streamState.id = nonza.getAttribute('id')?.value ?? '';
     }
     state = NegotiatorState.DONE;
     if (timer != null) {
       timer?.cancel();
     }
-    timer = Timer.periodic(
-        Duration(milliseconds: 5000), (Timer t) => sendAckRequest());
+    timer = Timer.periodic(Duration(milliseconds: 5000), (Timer t) => sendAckRequest());
     outStanzaSubscription = _connection.outStanzasStream.listen(parseOutStanza);
     inStanzaSubscription = _connection.inStanzasStream.listen(parseInStanza);
   }
 
   void handleResumed(Nonza nonza) {
-    parseAckResponse(nonza.getAttribute('h').value);
+    parseAckResponse(nonza.getAttribute('h')?.value ?? '');
 
     state = NegotiatorState.DONE;
     if (timer != null) {
       timer?.cancel();
     }
-    timer = Timer.periodic(
-        Duration(milliseconds: 5000), (Timer t) => sendAckRequest());
+    timer = Timer.periodic(Duration(milliseconds: 5000), (Timer t) => sendAckRequest());
   }
 
-  void sendEnableStreamManagement() =>
-      _connection.writeNonza(EnableNonza(true));
+  void sendEnableStreamManagement() => _connection.writeNonza(EnableNonza(true));
 
-  void sendAckResponse() =>
-      _connection.writeNonza(ANonza(streamState.lastReceivedStanza));
+  void sendAckResponse() => _connection.writeNonza(ANonza(streamState.lastReceivedStanza));
 
   void tryToResumeStream() {
-    if(!streamState.tryingToResume) {
-      _connection.writeNonza(
-          ResumeNonza(streamState.id ?? '', streamState.lastReceivedStanza));
+    if (!streamState.tryingToResume) {
+      _connection.writeNonza(ResumeNonza(streamState.id ?? '', streamState.lastReceivedStanza));
       streamState.tryingToResume = true;
     }
   }

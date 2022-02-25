@@ -27,8 +27,12 @@ class SaslAuthenticationFeature extends Negotiator {
   // improve this
   @override
   List<Nonza> match(List<Nonza> requests) {
-    Nonza? nonza = requests.firstWhere((element) => element.name == 'mechanisms');
-    return nonza != null? [nonza] : [];
+    try {
+      Nonza? nonza = requests.firstWhere((element) => element.name == 'mechanisms');
+      return [nonza];
+    } catch(e) {
+      return [];
+    }
   }
 
   @override

@@ -81,20 +81,15 @@ class Connection {
 
   bool authenticated = false;
 
-  final StreamController<AbstractStanza> _inStanzaStreamController =
-      StreamController.broadcast();
+  final StreamController<AbstractStanza> _inStanzaStreamController = StreamController.broadcast();
 
-  final StreamController<AbstractStanza> _outStanzaStreamController =
-      StreamController.broadcast();
+  final StreamController<AbstractStanza> _outStanzaStreamController = StreamController.broadcast();
 
-  final StreamController<Nonza> _inNonzaStreamController =
-      StreamController.broadcast();
+  final StreamController<Nonza> _inNonzaStreamController = StreamController.broadcast();
 
-  final StreamController<Nonza> _outNonzaStreamController =
-      StreamController.broadcast();
+  final StreamController<Nonza> _outNonzaStreamController = StreamController.broadcast();
 
-  final StreamController<XmppConnectionState> _connectionStateStreamController =
-      StreamController.broadcast();
+  final StreamController<XmppConnectionState> _connectionStateStreamController = StreamController.broadcast();
 
   Stream<AbstractStanza> get inStanzasStream {
     return _inStanzaStreamController.stream;
@@ -169,10 +164,8 @@ xml:lang='en'
       close();
       return '';
     }
-    if (response1.contains('stream:stream') &&
-        !(response1.contains('</stream:stream>'))) {
-      response1 = response1 +
-          '</stream:stream>'; // fix for crashing xml library without ending
+    if (response1.contains('stream:stream') && !(response1.contains('</stream:stream>'))) {
+      response1 = response1 + '</stream:stream>'; // fix for crashing xml library without ending
     }
 
     //fix for multiple roots issue
@@ -203,17 +196,12 @@ xml:lang='en'
     connectionNegotatiorManager.init();
     setState(XmppConnectionState.SocketOpening);
     try {
-      return await Socket.connect(account.host ?? account.domain, account.port)
-          .then((Socket socket) {
+      return await Socket.connect(account.host ?? account.domain, account.port).then((Socket socket) {
         // if not closed in meantime
         if (_state != XmppConnectionState.Closed) {
           setState(XmppConnectionState.SocketOpened);
           _socket = socket;
-          socket
-              .cast<List<int>>()
-              .transform(utf8.decoder)
-              .map(prepareStreamResponse)
-              .listen(handleResponse, onDone: handleConnectionDone);
+          socket.cast<List<int>>().transform(utf8.decoder).map(prepareStreamResponse).listen(handleResponse, onDone: handleConnectionDone);
           _openStream();
         } else {
           Log.d(TAG, 'Closed in meantime');
@@ -230,9 +218,7 @@ xml:lang='en'
     if (state == XmppConnectionState.SocketOpening) {
       throw Exception('Closing is not possible during this state');
     }
-    if (state != XmppConnectionState.Closed &&
-        state != XmppConnectionState.ForcefullyClosed &&
-        state != XmppConnectionState.Closing) {
+    if (state != XmppConnectionState.Closed && state != XmppConnectionState.ForcefullyClosed && state != XmppConnectionState.Closing) {
       if (_socket != null) {
         try {
           setState(XmppConnectionState.Closing);
@@ -288,37 +274,25 @@ xml:lang='en'
           xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild!;
         }
       } catch (e) {
-        _unparsedXmlResponse += fullResponse.substring(
-            0, fullResponse.length - 13); //remove  xmpp_stone end tag
+        _unparsedXmlResponse += fullResponse.substring(0, fullResponse.length - 13); //remove  xmpp_stone end tag
         xmlResponse = xml.XmlElement(xml.XmlName('error'));
       }
 //      xmlResponse.descendants.whereType<xml.XmlElement>().forEach((element) {
 //        Log.d("element: " + element.name.local);
 //      });
       //TODO: Improve parser for children only
-      xmlResponse?.descendants
-          .whereType<xml.XmlElement>()
-          .where((element) => startMatcher(element))
-          .forEach((element) => processInitialStream(element));
+      xmlResponse?.descendants.whereType<xml.XmlElement>().where((element) => startMatcher(element)).forEach((element) => processInitialStream(element));
 
       xmlResponse?.children
           .whereType<xml.XmlElement>()
           .where((element) => stanzaMatcher(element))
           .map((xmlElement) => StanzaParser.parseStanza(xmlElement))
-          .forEach((stanza) => stanza != null ?_inStanzaStreamController.add(stanza) : null);
+          .forEach((stanza) => stanza != null ? _inStanzaStreamController.add(stanza) : null);
 
-      xmlResponse?.descendants
-          .whereType<xml.XmlElement>()
-          .where((element) => featureMatcher(element))
-          .forEach((feature) =>
-              connectionNegotatiorManager.negotiateFeatureList(feature));
+      xmlResponse?.descendants.whereType<xml.XmlElement>().where((element) => featureMatcher(element)).forEach((feature) => connectionNegotatiorManager.negotiateFeatureList(feature));
 
       //TODO: Probably will introduce bugs!!!
-      xmlResponse?.children
-          .whereType<xml.XmlElement>()
-          .where((element) => nonzaMatcher(element))
-          .map((xmlElement) => Nonza.parse(xmlElement))
-          .forEach((nonza) => _inNonzaStreamController.add(nonza));
+      xmlResponse?.children.whereType<xml.XmlElement>().where((element) => nonzaMatcher(element)).map((xmlElement) => Nonza.parse(xmlElement)).forEach((nonza) => _inNonzaStreamController.add(nonza));
     }
   }
 
@@ -331,10 +305,7 @@ xml:lang='en'
   }
 
   bool isOpened() {
-    return state != XmppConnectionState.Closed &&
-        state != XmppConnectionState.ForcefullyClosed &&
-        state != XmppConnectionState.Closing &&
-        state != XmppConnectionState.SocketOpening;
+    return state != XmppConnectionState.Closed && state != XmppConnectionState.ForcefullyClosed && state != XmppConnectionState.Closing && state != XmppConnectionState.SocketOpening;
   }
 
   void write(message) {
@@ -381,16 +352,13 @@ xml:lang='en'
     if (_socket == null) {
       return;
     }
-    SecureSocket.secure(_socket!, onBadCertificate: _validateBadCertificate)
-        .then((secureSocket) {
+    SecureSocket.secure(_socket!, onBadCertificate: _validateBadCertificate).then((secureSocket) {
       _socket = secureSocket;
-      _socket?.cast<List<int>>()
+      _socket
+          ?.cast<List<int>>()
           .transform(utf8.decoder)
           .map(prepareStreamResponse)
-          .listen(handleResponse,
-              onError: (error) =>
-                  {handleSecuredConnectionError(error.toString())},
-              onDone: handleSecuredConnectionDone);
+          .listen(handleResponse, onError: (error) => {handleSecuredConnectionError(error.toString())}, onDone: handleSecuredConnectionDone);
       _openStream();
     });
   }
@@ -404,10 +372,10 @@ xml:lang='en'
   }
 
   bool elementHasAttribute(xml.XmlElement element, xml.XmlAttribute attribute) {
-    var list = element.attributes.firstWhere(
-        (attr) =>
-            attr.name.local == attribute.name.local &&
-            attr.value == attribute.value);
+    var list;
+    try {
+      list = element.attributes.firstWhere((attr) => attr.name.local == attribute.name.local && attr.value == attribute.value);
+    } catch (e) {}
     return list != null;
   }
 
@@ -466,7 +434,6 @@ xml:lang='en'
   }
 
   bool isAsyncSocketState() {
-    return state == XmppConnectionState.SocketOpening ||
-        state == XmppConnectionState.Closing;
+    return state == XmppConnectionState.SocketOpening || state == XmppConnectionState.Closing;
   }
 }

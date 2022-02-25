@@ -147,9 +147,9 @@ class RosterManager {
       _rosterMap.clear();
       xmppElement.children.forEach((child) {
         if (child.name == 'item') {
-          var jid = Jid.fromFullJid(child.getAttribute('jid').value);
-          var name = child.getAttribute('name').value;
-          var subscriptionString = child.getAttribute('subscription').value;
+          var jid = Jid.fromFullJid(child.getAttribute('jid')?.value ?? '');
+          var name = child.getAttribute('name')?.value ?? '';
+          var subscriptionString = child.getAttribute('subscription')?.value ?? '';
           var buddy = Buddy(jid);
           buddy.name = name;
           buddy.accountJid = _connection.fullJid;

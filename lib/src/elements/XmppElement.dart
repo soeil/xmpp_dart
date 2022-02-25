@@ -19,8 +19,12 @@ class XmppElement {
   List<XmppElement> get children => _children;
 
   final List<XmppAttribute> _attributes = <XmppAttribute>[];
-  XmppAttribute getAttribute(String name) {
-    return _attributes.firstWhere((attr) => attr.name == name);
+  XmppAttribute? getAttribute(String name) {
+    try {
+      return _attributes.firstWhere((attr) => attr.name == name);
+    } catch(e) {
+      return null;
+    }
   }
 
   void addAttribute(XmppAttribute attribute) {
@@ -35,8 +39,12 @@ class XmppElement {
     _children.add(element);
   }
 
-  XmppElement getChild(String name) {
-    return _children.firstWhere((element) => element.name == name);
+  XmppElement? getChild(String name) {
+    try {
+      return _children.firstWhere((element) => element.name == name);
+    } catch(e) {
+      return null;
+    }
   }
 
   String buildXmlString() {
@@ -62,7 +70,7 @@ class XmppElement {
   }
 
   String getNameSpace() {
-    return getAttribute('xmlns').value;
+    return getAttribute('xmlns')?.value ?? '';
   }
 
   List<XmppAttribute> get attributes => _attributes;

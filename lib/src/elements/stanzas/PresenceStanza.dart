@@ -18,7 +18,7 @@ class PresenceStanza extends AbstractStanza {
   }
 
   PresenceType get type {
-    var typeValue = getAttribute('type').value;
+    var typeValue = getAttribute('type')?.value ?? '';
     return typeFromString(typeValue);
   }
 
@@ -28,18 +28,24 @@ class PresenceStanza extends AbstractStanza {
   }
 
   PresenceShowElement get show {
-    var showValue = getChild('show').textValue;
+    var showValue = getChild('show')?.textValue ?? '';
     return showFromString(showValue);
   }
 
   //status with no language prefs
   String get status {
-    var statusElement = children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty);
+    var statusElement;
+    try {
+      children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty)
+    } catch(e) {}
     return statusElement.textValue ?? '';
   }
 
   set status(String value) {
-    var childElement = children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty);
+    var childElement;
+    try {
+      childElement = children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty);
+    } catch(e) {}
     if (childElement == null) {
       var element = XmppElement();
       element.name = 'status';
@@ -51,7 +57,7 @@ class PresenceStanza extends AbstractStanza {
   }
 
   int get priority {
-    return int.tryParse(getChild('priority').textValue) ?? 0;
+    return int.tryParse(getChild('priority')?.textValue ?? '0') ?? 0;
   }
 
   set priority(int value) {
@@ -96,7 +102,10 @@ class PresenceStanza extends AbstractStanza {
   }
 
   void _setChildValue(String childName, String value) {
-    var childElement = children.firstWhere((element) => element.name == childName && element.attributes.isEmpty);
+    var childElement;
+    try {
+      childElement = children.firstWhere((element) => element.name == childName && element.attributes.isEmpty);
+    } catch(e) {}
     if (childElement == null) {
       var element = XmppElement();
       element.name = childName;
@@ -108,7 +117,10 @@ class PresenceStanza extends AbstractStanza {
   }
 
   void _setAttributeValue(String attrName, String value) {
-    var attr = attributes.firstWhere((attribute) => attribute.name == name);
+    var attr;
+    try {
+      attr = attributes.firstWhere((attribute) => attribute.name == name);
+    } catch (e) {}
     if (attr == null) {
       var element = XmppElement();
       element.name = attrName;

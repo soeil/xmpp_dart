@@ -26,9 +26,9 @@ class FieldElement extends XmppElement {
     }
   }
 
-  String get varAttr => getAttribute('var').value;
+  String get varAttr => getAttribute('var')?.value ?? '';
 
-  String get typeAttr => getAttribute('type').value;
+  String get typeAttr => getAttribute('type')?.value ?? '';
 
-  String get value => getChild('value').textValue;
+  String get value => getChild('value')?.textValue ?? '';
 }

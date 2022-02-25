@@ -117,9 +117,13 @@ class ServiceDiscoveryNegotiator extends Negotiator {
   }
 
   bool isFeatureSupported(String feature) {
-    return _supportedFeatures.firstWhere(
-            (element) => element.textValue == feature,) !=
-        null;
+    try {
+      _supportedFeatures.firstWhere(
+            (element) => element.textValue == feature,);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   List<Feature> getSupportedFeatures() {

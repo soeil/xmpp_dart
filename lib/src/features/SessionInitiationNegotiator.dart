@@ -22,8 +22,12 @@ class SessionInitiationNegotiator extends Negotiator {
   }
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhere((request) => request.name == 'session');
-    return nonza != null ? [nonza] : [];
+    try {
+      Nonza? nonza = requests.firstWhere((request) => request.name == 'session');
+      return [nonza];
+    } catch(e) {
+      return [];
+    }
   }
 
   @override

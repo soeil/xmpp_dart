@@ -23,8 +23,12 @@ class BindingResourceConnectionNegotiator extends Negotiator {
   }
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhere((request) => request.name == BIND_NAME);
-    return nonza != null ? [nonza] : [];
+    try {
+      Nonza? nonza = requests.firstWhere((request) => request.name == BIND_NAME);
+      return [nonza];
+    } catch (e) {
+      return [];
+    }
   }
 
   @override

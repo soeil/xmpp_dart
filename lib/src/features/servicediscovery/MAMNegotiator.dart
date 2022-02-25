@@ -84,7 +84,7 @@ class MAMNegotiator extends Negotiator {
 
   void checkStanzas(AbstractStanza stanza) {
     if (stanza is IqStanza && stanza.id == _myUnrespondedIqStanza?.id) {
-      var x = stanza.getChild('query').getChild('x');
+      var x = stanza.getChild('query')?.getChild('x');
       if (x != null) {
         x.children.forEach((element) {
           if (element is FieldElement) {

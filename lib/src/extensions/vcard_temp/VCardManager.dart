@@ -85,9 +85,9 @@ class VCardManager {
             }
             unrespondedStanza?.item2.complete(vCard);
           }
-        } else if (stanza.type == IqStanzaType.ERROR) {
+        } else if (stanza.type == IqStanzaType.ERROR && stanza.getChild('vCard') != null) {
           unrespondedStanza?.item2
-              .complete(InvalidVCard(stanza.getChild('vCard')));
+              .complete(InvalidVCard(stanza.getChild('vCard')!));
         }
       }
     }
