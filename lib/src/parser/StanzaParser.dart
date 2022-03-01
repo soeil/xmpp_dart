@@ -55,7 +55,7 @@ class StanzaParser {
     var typeString = element.getAttribute('type');
     MessageStanzaType? type;
     if (typeString == null) {
-      type = MessageStanzaType.NORMAL;
+      // type = MessageStanzaType.NORMAL;
       Log.w(TAG, 'No type found for message stanza');
     } else {
       switch (typeString) {
