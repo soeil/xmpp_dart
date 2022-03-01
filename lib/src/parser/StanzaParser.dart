@@ -43,8 +43,7 @@ class StanzaParser {
       stanza?.toJid = to;
     }
     element.attributes.forEach((xmlAttribute) {
-      stanza?.addAttribute(
-          XmppAttribute(xmlAttribute.name.local, xmlAttribute.value));
+      stanza?.addAttribute(XmppAttribute(xmlAttribute.name.local, xmlAttribute.value));
     });
     element.children.forEach((child) {
       if (child is xml.XmlElement) stanza?.addChild(parseElement(child));
@@ -74,6 +73,9 @@ class StanzaParser {
         case 'normal':
           type = MessageStanzaType.NORMAL;
           break;
+        default:
+          type = MessageStanzaType.NORMAL;
+          break;
       }
     }
     var stanza = MessageStanza(id, type);
@@ -81,8 +83,7 @@ class StanzaParser {
     return stanza;
   }
 
-  static PresenceStanza _parsePresenceStanza(
-      String id, xml.XmlElement element) {
+  static PresenceStanza _parsePresenceStanza(String id, xml.XmlElement element) {
     var presenceStanza = PresenceStanza();
     presenceStanza.id = id;
     return presenceStanza;
@@ -105,8 +106,7 @@ class StanzaParser {
     }
     xmppElement.name = xmlElement.name?.local ?? '';
     xmlElement.attributes.forEach((xmlAttribute) {
-      xmppElement.addAttribute(
-          XmppAttribute(xmlAttribute.name?.local ?? '', xmlAttribute.value ?? ''));
+      xmppElement.addAttribute(XmppAttribute(xmlAttribute.name?.local ?? '', xmlAttribute.value ?? ''));
     });
     xmlElement.children.forEach((xmlChild) {
       if (xmlChild is xml.XmlElement) {
