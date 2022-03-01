@@ -20,9 +20,10 @@ class StanzaParser {
   //TODO: Improve this!
   static AbstractStanza? parseStanza(xml.XmlElement element) {
     AbstractStanza? stanza;
-    String id = element.getAttribute('id') ?? '';
+    String? id = element.getAttribute('id');
     if (id == null) {
       Log.d(TAG, 'No id found for stanza');
+      return null;
     }
 
     if (element.name.local == 'iq') {
