@@ -23,15 +23,14 @@ class StanzaParser {
     String? id = element.getAttribute('id');
     if (id == null) {
       Log.d(TAG, 'No id found for stanza ${element.toString()}');
-      return null;
     }
 
     if (element.name.local == 'iq') {
-      stanza = IqParser.parseIqStanza(id, element);
+      stanza = IqParser.parseIqStanza(id ?? '', element);
     } else if (element.name.local == 'message') {
-      stanza = _parseMessageStanza(id, element);
+      stanza = _parseMessageStanza(id ?? '', element);
     } else if (element.name.local == 'presence') {
-      stanza = _parsePresenceStanza(id, element);
+      stanza = _parsePresenceStanza(id ?? '', element);
     }
     var fromString = element.getAttribute('from');
     if (fromString != null) {
