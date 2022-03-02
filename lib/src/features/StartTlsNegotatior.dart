@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/src/iterable_extensions.dart';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
@@ -10,8 +11,8 @@ import '../logger/Log.dart';
 
 class StartTlsNegotiator extends Negotiator {
   static const TAG = 'StartTlsNegotiator';
-  Connection _connection;
-  StreamSubscription<Nonza> subscription;
+  late Connection _connection;
+  StreamSubscription<Nonza>? subscription;
 
   StartTlsNegotiator(Connection connection) {
     _connection = connection;
@@ -34,7 +35,7 @@ class StartTlsNegotiator extends Negotiator {
     if (nonza.name == 'proceed') {
       _connection.startSecureSocket();
       state = NegotiatorState.DONE_CLEAN_OTHERS;
-      subscription.cancel();
+      subscription?.cancel();
     } else if (nonza.name == 'failure') {
       _connection.startTlsFailed();
     }
@@ -42,11 +43,10 @@ class StartTlsNegotiator extends Negotiator {
 
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhere(
+    var nonza = requests.firstWhereOrNull(
         (request) =>
             request.name == 'starttls' &&
-            request.getAttribute('xmlns')?.value == expectedNameSpace,
-        orElse: () => null);
+            request.getAttribute('xmlns')?.value == expectedNameSpace);
     return nonza != null ? [nonza] : [];
   }
 }

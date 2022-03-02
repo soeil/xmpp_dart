@@ -18,43 +18,43 @@ class StanzaParser {
   static const TAG = 'StanzaParser';
 
   //TODO: Improve this!
-  static AbstractStanza parseStanza(xml.XmlElement element) {
-    AbstractStanza stanza;
+  static AbstractStanza? parseStanza(xml.XmlElement element) {
+    AbstractStanza? stanza;
     var id = element.getAttribute('id');
     if (id == null) {
       Log.d(TAG, 'No id found for stanza');
     }
 
-    if (element.name.local == 'iq') {
+    if (element.name.local == 'iq' && id != null) {
       stanza = IqParser.parseIqStanza(id, element);
-    } else if (element.name.local == 'message') {
+    } else if (element.name.local == 'message' && id != null) {
       stanza = _parseMessageStanza(id, element);
-    } else if (element.name.local == 'presence') {
+    } else if (element.name.local == 'presence' && id != null) {
       stanza = _parsePresenceStanza(id, element);
     }
     var fromString = element.getAttribute('from');
     if (fromString != null) {
       var from = Jid.fromFullJid(fromString);
-      stanza.fromJid = from;
+      stanza?.fromJid = from;
     }
     var toString = element.getAttribute('to');
     if (toString != null) {
       var to = Jid.fromFullJid(toString);
-      stanza.toJid = to;
+      stanza?.toJid = to;
     }
     element.attributes.forEach((xmlAttribute) {
-      stanza.addAttribute(
+      stanza?.addAttribute(
           XmppAttribute(xmlAttribute.name.local, xmlAttribute.value));
     });
     element.children.forEach((child) {
-      if (child is xml.XmlElement) stanza.addChild(parseElement(child));
+      if (child is xml.XmlElement) stanza?.addChild(parseElement(child));
     });
     return stanza;
   }
 
   static MessageStanza _parseMessageStanza(String id, xml.XmlElement element) {
     var typeString = element.getAttribute('type');
-    MessageStanzaType type;
+    MessageStanzaType? type;
     if (typeString == null) {
       Log.w(TAG, 'No type found for message stanza');
     } else {

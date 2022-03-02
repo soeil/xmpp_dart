@@ -49,12 +49,15 @@ class Jid {
     return local != null && local.isNotEmpty && domain != null && domain.isNotEmpty;
   }
 
-  static Jid fromFullJid(String fullJid) {
+  static Jid fromFullJid(String? fullJid) {
     var exp = RegExp(r'^((.*?)@)?([^/@]+)(/(.*))?$');
+    if (fullJid == null) {
+      return InvalidJid();
+    }
     Iterable<Match> matches = exp.allMatches(fullJid);
     var match = matches.first;
     if (match != null) {
-      return Jid(match[2], match[3], match[5]);
+      return Jid(match[2] ?? '', match[3] ?? '', match[5] ?? '');
     } else {
       return InvalidJid();
     }

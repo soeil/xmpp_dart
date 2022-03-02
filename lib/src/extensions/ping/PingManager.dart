@@ -31,9 +31,9 @@ class PingManager {
       if (stanza.type == IqStanzaType.GET) {
         var ping = stanza.getChild('ping');
         if (ping != null) {
-          var iqStanza = IqStanza(stanza.id, IqStanzaType.RESULT);
+          var iqStanza = IqStanza(stanza.id!, IqStanzaType.RESULT);
           iqStanza.fromJid = _connection.fullJid;
-          iqStanza.toJid = stanza.fromJid;
+          iqStanza.toJid = stanza.fromJid!;
           _connection.writeStanza(iqStanza);
         }
       } else if (stanza.type == IqStanzaType.ERROR) {

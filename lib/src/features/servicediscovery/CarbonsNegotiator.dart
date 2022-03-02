@@ -34,8 +34,8 @@ class CarbonsNegotiator extends Negotiator {
 
   bool enabled = false;
 
-  StreamSubscription<AbstractStanza> _subscription;
-  IqStanza _myUnrespondedIqStanza;
+  StreamSubscription<AbstractStanza>? _subscription;
+  IqStanza? _myUnrespondedIqStanza;
 
   CarbonsNegotiator(this._connection) {
     expectedName = 'urn:xmpp:carbons';
@@ -70,10 +70,10 @@ class CarbonsNegotiator extends Negotiator {
   }
 
   void checkStanzas(AbstractStanza stanza) {
-    if (stanza is IqStanza && stanza.id == _myUnrespondedIqStanza.id) {
+    if (stanza is IqStanza && stanza.id == _myUnrespondedIqStanza?.id) {
       enabled = stanza.type == IqStanzaType.RESULT;
       state = NegotiatorState.DONE;
-      _subscription.cancel();
+      _subscription?.cancel();
     }
   }
 }

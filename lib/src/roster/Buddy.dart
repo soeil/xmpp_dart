@@ -1,25 +1,25 @@
 import 'package:xmpp_stone/src/data/Jid.dart';
 
 class Buddy {
-  SubscriptionType _subscriptionType;
+  SubscriptionType? _subscriptionType;
 
-  String _name;
+  String? _name;
 
-  Jid _accountJid;
+  Jid? _accountJid;
 
-  Jid get accountJid => _accountJid;
+  Jid? get accountJid => _accountJid;
 
-  set accountJid(Jid value) {
+  set accountJid(Jid? value) {
     _accountJid = value;
   }
 
-  SubscriptionType get subscriptionType => _subscriptionType;
+  SubscriptionType? get subscriptionType => _subscriptionType;
 
-  set subscriptionType(SubscriptionType value) {
+  set subscriptionType(SubscriptionType? value) {
     _subscriptionType = value;
   }
 
-  Jid _jid;
+  late Jid _jid;
 
   Jid get jid => _jid;
 
@@ -32,13 +32,13 @@ class Buddy {
     return _jid.fullJid;
   }
 
-  String get name => _name;
+  String? get name => _name;
 
-  set name(String value) {
+  set name(String? value) {
     _name = value;
   }
 
-  static SubscriptionType typeFromString(String typeString) {
+  static SubscriptionType? typeFromString(String? typeString) {
     switch (typeString) {
       case 'none':
         return SubscriptionType.NONE;

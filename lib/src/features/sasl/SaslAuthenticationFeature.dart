@@ -1,3 +1,4 @@
+import 'package:collection/src/iterable_extensions.dart';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
@@ -8,12 +9,12 @@ import 'package:xmpp_stone/src/features/sasl/ScramSaslHandler.dart';
 import '../../elements/nonzas/Nonza.dart';
 
 class SaslAuthenticationFeature extends Negotiator {
-  Connection _connection;
+  late Connection _connection;
 
   final Set<SaslMechanism> _offeredMechanisms = <SaslMechanism>{};
   final Set<SaslMechanism> _supportedMechanisms = <SaslMechanism>{};
 
-  String _password;
+  late String _password;
 
   SaslAuthenticationFeature(Connection connection, String password) {
     _password = password;
@@ -27,8 +28,8 @@ class SaslAuthenticationFeature extends Negotiator {
   // improve this
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhere((element) => element.name == 'mechanisms', orElse: () => null);
-    return nonza != null? [nonza] : [];
+    var nonza = requests.firstWhereOrNull((element) => element.name == 'mechanisms');
+    return nonza != null ? [nonza] : [];
   }
 
   @override
@@ -40,10 +41,8 @@ class SaslAuthenticationFeature extends Negotiator {
   }
 
   void _process() {
-    var mechanism = _supportedMechanisms.firstWhere(
-        (mch) => _offeredMechanisms.contains(mch),
-        orElse: _handleAuthNotSupported);
-    AbstractSaslHandler saslHandler;
+    var mechanism = _supportedMechanisms.firstWhere((mch) => _offeredMechanisms.contains(mch), orElse: _handleAuthNotSupported);
+    AbstractSaslHandler? saslHandler;
     switch (mechanism) {
       case SaslMechanism.PLAIN:
         saslHandler = PlainSaslHandler(_connection, _password);
@@ -75,9 +74,7 @@ class SaslAuthenticationFeature extends Negotiator {
   }
 
   void _populateOfferedMechanism(Nonza nonza) {
-    nonza.children
-        .where((element) => element.name == 'mechanism')
-        .forEach((mechanism) {
+    nonza.children.where((element) => element.name == 'mechanism').forEach((mechanism) {
       switch (mechanism.textValue) {
         case 'EXTERNAL':
           _offeredMechanisms.add(SaslMechanism.EXTERNAL);
@@ -106,11 +103,4 @@ class SaslAuthenticationFeature extends Negotiator {
   }
 }
 
-enum SaslMechanism {
-  EXTERNAL,
-  SCRAM_SHA_1_PLUS,
-  SCRAM_SHA_1,
-  SCRAM_SHA_256,
-  PLAIN,
-  NOT_SUPPORTED
-}
+enum SaslMechanism { EXTERNAL, SCRAM_SHA_1_PLUS, SCRAM_SHA_1, SCRAM_SHA_256, PLAIN, NOT_SUPPORTED }

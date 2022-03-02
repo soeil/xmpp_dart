@@ -10,8 +10,7 @@ import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/extensions/vcard_temp/VCard.dart';
 
 class VCardManager {
-  static Map<Connection, VCardManager> instances =
-      <Connection, VCardManager>{};
+  static Map<Connection, VCardManager> instances = <Connection, VCardManager>{};
 
   static VCardManager getInstance(Connection connection) {
     var manager = instances[connection];
@@ -30,36 +29,33 @@ class VCardManager {
     _connection.inStanzasStream.listen(_processStanza);
   }
 
-  final Map<String, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas =
-      <String, Tuple2<IqStanza, Completer>>{};
+  final Map<String, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas = <String, Tuple2<IqStanza, Completer>>{};
 
   final Map<String, VCard> _vCards = <String, VCard>{};
 
   Future<VCard> getSelfVCard() {
     var completer = Completer<VCard>();
-    var iqStanza =
-        IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqStanza.fromJid = _connection.fullJid;
     var vCardElement = XmppElement();
     vCardElement.name = 'vCard';
     vCardElement.addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
     iqStanza.addChild(vCardElement);
-    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
+    _myUnrespondedIqStanzas[iqStanza.id!] = Tuple2(iqStanza, completer);
     _connection.writeStanza(iqStanza);
     return completer.future;
   }
 
   Future<VCard> getVCardFor(Jid jid) {
     var completer = Completer<VCard>();
-    var iqStanza =
-        IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqStanza.fromJid = _connection.fullJid;
     iqStanza.toJid = jid;
     var vCardElement = XmppElement();
     vCardElement.name = 'vCard';
     vCardElement.addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
     iqStanza.addChild(vCardElement);
-    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
+    _myUnrespondedIqStanzas[iqStanza.id!] = Tuple2(iqStanza, completer);
     _connection.writeStanza(iqStanza);
     return completer.future;
   }
@@ -79,15 +75,14 @@ class VCardManager {
           if (vCardChild != null) {
             var vCard = VCard(vCardChild);
             if (stanza.fromJid != null) {
-              _vCards[stanza.fromJid.userAtDomain] = vCard;
+              _vCards[stanza.fromJid!.userAtDomain] = vCard;
             } else {
               _vCards[_connection.fullJid.userAtDomain] = vCard;
             }
-            unrespondedStanza.item2.complete(vCard);
+            unrespondedStanza!.item2.complete(vCard);
           }
         } else if (stanza.type == IqStanzaType.ERROR) {
-          unrespondedStanza.item2
-              .complete(InvalidVCard(stanza.getChild('vCard')));
+          unrespondedStanza!.item2.complete(InvalidVCard(stanza.getChild('vCard')));
         }
       }
     }

@@ -19,19 +19,19 @@ class ScramSaslHandler implements AbstractSaslHandler {
   static const CLIENT_NONCE_LENGTH = 48;
   static const TAG = 'ScramSaslHandler';
 
-  Connection _connection;
-  StreamSubscription<Nonza> subscription;
+  late Connection _connection;
+  StreamSubscription<Nonza>? subscription;
   final _completer = Completer<AuthenticationResult>();
   ScramStates _scramState = ScramStates.INITIAL;
-  String _password;
-  String _username;
-  String _clientNonce;
-  String _initialMessage;
+  late String _password;
+  late String _username;
+  late String _clientNonce;
+  String? _initialMessage;
 
   final SaslMechanism _mechanism;
-  Hash _hash;
+  late Hash _hash;
 
-  String _mechanismString;
+  String? _mechanismString;
 
   var serverSignature;
 
@@ -61,7 +61,10 @@ class ScramSaslHandler implements AbstractSaslHandler {
   }
 
   void generateRandomClientNonce() {
-    var bytes = List<int>(CLIENT_NONCE_LENGTH);
+    var bytes = <int>[];
+    for (var i = 0; i < CLIENT_NONCE_LENGTH; i++) {
+      bytes.add(0);
+    }
     for (var i = 0; i < CLIENT_NONCE_LENGTH; i++) {
       bytes[i] = Random.secure().nextInt(256);
     }
@@ -88,13 +91,13 @@ class ScramSaslHandler implements AbstractSaslHandler {
         _fireAuthFailed('Auth Error in sent username');
       } else if (nonza.name == 'challenge') {
         //challenge
-        challengeFirst(nonza.textValue);
+        challengeFirst(nonza.textValue!);
       }
     } else if (_scramState == ScramStates.RESPONSE_SENT) {
       if (nonza.name == 'failure') {
         _fireAuthFailed('Auth Error in challenge');
       } else if (nonza.name == 'success') {
-        verifyServerHasKey(nonza.textValue);
+        verifyServerHasKey(nonza.textValue!);
       }
     }
   }
@@ -102,7 +105,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
   void _fireAuthFailed(String message) {
     //todo sent auth error message
     Log.e(TAG, message);
-    subscription.cancel();
+    subscription?.cancel();
     _completer.complete(AuthenticationResult(false, message));
   }
 
@@ -168,7 +171,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
     var saltedPassword = PBKDF2(utf8.encode(_password), saltB, iterationsNo);
     var serverKey = hmac(saltedPassword, utf8.encode('Server Key'));
     var clientKey = hmac(saltedPassword, utf8.encode('Client Key'));
-    List<int> clientSignature;
+    late List<int> clientSignature;
     try {
       serverSignature = hmac(serverKey, authMessage);
       var storedKey = _hash.convert(clientKey).bytes;
@@ -176,7 +179,10 @@ class ScramSaslHandler implements AbstractSaslHandler {
     } catch (e) {
       _fireAuthFailed('Invalid key');
     }
-    var clientProof = List<int>(clientKey.length);
+    var clientProof = <int>[];
+    for (var i = 0; i < clientKey.length; i++) {
+      clientProof.add(0);
+    }
     for (var i = 0; i < clientKey.length; i++) {
       clientProof[i] = clientKey[i] ^ clientSignature[i];
     }
@@ -214,7 +220,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
         expectedServerFinalMessage) {
       _fireAuthFailed('Server final message does not match expected one');
     } else {
-      subscription.cancel();
+      subscription?.cancel();
       _completer.complete(AuthenticationResult(true, ''));
     }
   }

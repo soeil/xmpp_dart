@@ -22,7 +22,7 @@ class RosterManager {
     return manager;
   }
 
-  final Map<String, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas = <String, Tuple2<IqStanza, Completer>>{};
+  final Map<String, Tuple2<IqStanza, Completer?>> _myUnrespondedIqStanzas = <String, Tuple2<IqStanza, Completer>>{};
 
   final StreamController<List<Buddy>> _rosterController = StreamController<List<Buddy>>.broadcast();
 
@@ -32,7 +32,7 @@ class RosterManager {
 
   final Map<Jid, Buddy> _rosterMap = <Jid, Buddy>{};
 
-  Connection _connection;
+  late Connection _connection;
 
   void queryForRoster() {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
@@ -40,7 +40,7 @@ class RosterManager {
     element.name = 'query';
     element.addAttribute(XmppAttribute('xmlns', 'jabber:iq:roster'));
     iqStanza.addChild(element);
-    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, null);
+    _myUnrespondedIqStanzas[iqStanza.id!] = Tuple2(iqStanza, null);
     _connection.writeStanza(iqStanza);
   }
 
@@ -66,7 +66,7 @@ class RosterManager {
     if (rosterItem.name != null) {
       itemElement.addAttribute(XmppAttribute('name', rosterItem.name));
     }
-    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
+    _myUnrespondedIqStanzas[iqStanza.id!] = Tuple2(iqStanza, completer);
     _connection.writeStanza(iqStanza);
     return completer.future;
   }
@@ -83,7 +83,7 @@ class RosterManager {
     queryElement.addChild(itemElement);
     itemElement.addAttribute(XmppAttribute('jid', rosterItem.jid.userAtDomain));
     itemElement.addAttribute(XmppAttribute('subscription', 'remove'));
-    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
+    _myUnrespondedIqStanzas[iqStanza.id!] = Tuple2(iqStanza, completer);
     ;
     _connection.writeStanza(iqStanza);
     return completer.future;
@@ -106,10 +106,10 @@ class RosterManager {
 
   void _processStanza(AbstractStanza stanza) {
     if (stanza is IqStanza) {
-      var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
       if (_myUnrespondedIqStanzas[stanza.id] != null) {
+        var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
         if (stanza.type == IqStanzaType.RESULT) {
-          if (_isFullJidRequest(unrespondedStanza.item1)) {
+          if (_isFullJidRequest(unrespondedStanza!.item1)) {
             _handleFullRosterResponse(stanza);
           } else if (_isRosterSet(stanza)) {
             _handleRosterSetSuccessResponse(unrespondedStanza);
@@ -120,7 +120,7 @@ class RosterManager {
           _sendRosterPushResult(stanza);
         } else if (stanza.type == IqStanzaType.ERROR) {
           //todo handle error cases
-          _handleRosterSetErrorResponse(unrespondedStanza);
+          _handleRosterSetErrorResponse(unrespondedStanza!);
         }
       }
     }
@@ -145,7 +145,7 @@ class RosterManager {
       _rosterMap.clear();
       xmppElement.children.forEach((child) {
         if (child.name == 'item') {
-          var jid = Jid.fromFullJid(child.getAttribute('jid').value);
+          var jid = Jid.fromFullJid(child.getAttribute('jid')?.value);
           var name = child.getAttribute('name')?.value;
           var subscriptionString = child.getAttribute('subscription')?.value;
           var buddy = Buddy(jid);
@@ -160,19 +160,19 @@ class RosterManager {
   }
 
   void _sendRosterPushResult(IqStanza stanza) {
-    var iqStanza = IqStanza(stanza.id, IqStanzaType.RESULT);
+    var iqStanza = IqStanza(stanza.id!, IqStanzaType.RESULT);
     iqStanza.fromJid = _connection.fullJid;
     _connection.writeStanza(iqStanza);
   }
 
-  void _handleRosterSetSuccessResponse(Tuple2<IqStanza, Completer> request) {
-    request.item2.complete(true);
+  void _handleRosterSetSuccessResponse(Tuple2<IqStanza, Completer?> request) {
+    request.item2?.complete(true);
     _myUnrespondedIqStanzas.remove(request.item1.id);
   }
 
   //todo add error description
-  void _handleRosterSetErrorResponse(Tuple2<IqStanza, Completer> request) {
-    request.item2.complete(IqStanzaResult()
+  void _handleRosterSetErrorResponse(Tuple2<IqStanza, Completer?> request) {
+    request.item2?.complete(IqStanzaResult()
       ..type = IqStanzaType.ERROR
       ..description = '');
     _myUnrespondedIqStanzas.remove(request.item1.id);

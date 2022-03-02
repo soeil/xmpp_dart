@@ -1,9 +1,10 @@
+import 'package:collection/src/iterable_extensions.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 
 class MessageStanza extends AbstractStanza {
-  MessageStanzaType _type;
+  late MessageStanzaType _type;
 
   MessageStanzaType get type => _type;
 
@@ -19,34 +20,27 @@ class MessageStanza extends AbstractStanza {
         XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
   }
 
-  String get body => children
-      .firstWhere((child) => (child.name == 'body' && child.attributes.isEmpty),
-          orElse: () => null)
-      ?.textValue;
+  String? get body => children.firstWhereOrNull((child) => (child.name == 'body' && child.attributes.isEmpty))?.textValue;
 
-  set body(String value) {
+  set body(String? value) {
     var element = XmppElement();
     element.name = 'body';
     element.textValue = value;
     addChild(element);
   }
 
-  String get subject => children
-      .firstWhere((child) => (child.name == 'subject'), orElse: () => null)
-      ?.textValue;
+  String? get subject => children.firstWhereOrNull((child) => (child.name == 'subject'))?.textValue;
 
-  set subject(String value) {
+  set subject(String? value) {
     var element = XmppElement();
     element.name = 'subject';
     element.textValue = value;
     addChild(element);
   }
 
-  String get thread => children
-      .firstWhere((child) => (child.name == 'thread'), orElse: () => null)
-      ?.textValue;
+  String? get thread => children.firstWhereOrNull((child) => (child.name == 'thread'))?.textValue;
 
-  set thread(String value) {
+  set thread(String? value) {
     var element = XmppElement();
     element.name = 'thread';
     element.textValue = value;

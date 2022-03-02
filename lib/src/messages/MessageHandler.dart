@@ -24,7 +24,7 @@ class MessageHandler implements MessageApi {
     return manager;
   }
 
-  Connection _connection;
+  late Connection _connection;
 
   MessageHandler(Connection connection) {
     _connection = connection;

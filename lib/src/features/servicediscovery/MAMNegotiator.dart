@@ -26,9 +26,9 @@ class MAMNegotiator extends Negotiator {
     return instance;
   }
 
-  IqStanza _myUnrespondedIqStanza;
+  IqStanza? _myUnrespondedIqStanza;
 
-  StreamSubscription<AbstractStanza> _subscription;
+  StreamSubscription<AbstractStanza>? _subscription;
 
   final Connection _connection;
 
@@ -36,7 +36,7 @@ class MAMNegotiator extends Negotiator {
 
   bool enabled = false;
 
-  bool hasExtended;
+  bool? hasExtended;
 
   MAMNegotiator(this._connection) {
     expectedName = 'urn:xmpp:mam';
@@ -83,7 +83,7 @@ class MAMNegotiator extends Negotiator {
   }
 
   void checkStanzas(AbstractStanza stanza) {
-    if (stanza is IqStanza && stanza.id == _myUnrespondedIqStanza.id) {
+    if (stanza is IqStanza && stanza.id == _myUnrespondedIqStanza?.id) {
       var x = stanza.getChild('query')?.getChild('x');
       if (x != null) {
         x.children.forEach((element) {
@@ -112,7 +112,7 @@ class MAMNegotiator extends Negotiator {
         });
       }
       state = NegotiatorState.DONE;
-      _subscription.cancel();
+      _subscription?.cancel();
     }
   }
 

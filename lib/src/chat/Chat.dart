@@ -18,13 +18,13 @@ class ChatImpl implements Chat {
 
   @override
   Jid get jid => _jid;
-  ChatState _myState;
+  late ChatState _myState;
   @override
   ChatState get myState => _myState;
 
-  ChatState _remoteState;
+  ChatState? _remoteState;
   @override
-  ChatState get remoteState => _remoteState;
+  ChatState? get remoteState => _remoteState;
 
   @override
   List<Message> messages = [];
@@ -43,14 +43,14 @@ class ChatImpl implements Chat {
 
   void parseMessage(Message message) {
     if (message.type == MessageStanzaType.CHAT) {
-      if (message.text != null && message.text.isNotEmpty) {
+      if (message.text != null && message.text!.isNotEmpty) {
         messages.add(message);
         _newMessageController.add(message);
       }
 
-      if (message.chatState != null && !message.isDelayed) {
+      if (message.chatState != null && !(message.isDelayed ?? false)) {
         _remoteState = message.chatState;
-        _remoteStateController.add(message.chatState);
+        _remoteStateController.add(message.chatState!);
       }
     }
   }
@@ -87,10 +87,10 @@ class ChatImpl implements Chat {
 abstract class Chat {
   Jid get jid;
   ChatState get myState;
-  ChatState get remoteState;
+  ChatState? get remoteState;
   Stream<Message> get newMessageStream;
   Stream<ChatState> get remoteStateStream;
-  List<Message> messages;
+  List<Message> messages = [];
   void sendMessage(String text);
   set myState(ChatState state);
 }
