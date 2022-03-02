@@ -28,9 +28,9 @@ class ServiceDiscoveryNegotiator extends Negotiator {
     return instance;
   }
 
-  IqStanza? fullRequestStanza;
+  IqStanza fullRequestStanza;
 
-  StreamSubscription<AbstractStanza>? subscription;
+  StreamSubscription<AbstractStanza> subscription;
 
   final Connection _connection;
 
@@ -111,19 +111,16 @@ class ServiceDiscoveryNegotiator extends Negotiator {
         _errorStreamController.add(errorStanza);
       }
     }
-    subscription?.cancel();
+    subscription.cancel();
     _connection.connectionNegotatiorManager.addFeatures(_supportedFeatures);
     state = NegotiatorState.DONE;
   }
 
   bool isFeatureSupported(String feature) {
-    try {
-      _supportedFeatures.firstWhere(
-            (element) => element.textValue == feature,);
-      return true;
-    } catch (e) {
-      return false;
-    }
+    return _supportedFeatures.firstWhere(
+            (element) => element.textValue == feature,
+            orElse: () => null) !=
+        null;
   }
 
   List<Feature> getSupportedFeatures() {

@@ -23,9 +23,9 @@ void main(List<String> arguments) {
   ExampleConnectionStateChangedListener(connection, messagesListener);
   var presenceManager = xmpp.PresenceManager.getInstance(connection);
   presenceManager.subscriptionStream.listen((streamEvent) {
-    if (streamEvent.type == xmpp.SubscriptionEventType.REQUEST && streamEvent.jid != null) {
+    if (streamEvent.type == xmpp.SubscriptionEventType.REQUEST) {
       Log.d(TAG, 'Accepting presence request');
-      presenceManager.acceptSubscription(streamEvent.jid!);
+      presenceManager.acceptSubscription(streamEvent.jid);
     }
   });
   var receiver = 'nemanja2@test';
@@ -37,10 +37,10 @@ void main(List<String> arguments) {
 }
 
 class ExampleConnectionStateChangedListener implements xmpp.ConnectionStateChangedListener {
-  late xmpp.Connection _connection;
-  late xmpp.MessagesListener _messagesListener;
+  xmpp.Connection _connection;
+  xmpp.MessagesListener _messagesListener;
 
-  StreamSubscription<String>? subscription;
+  StreamSubscription<String> subscription;
 
   ExampleConnectionStateChangedListener(xmpp.Connection connection, xmpp.MessagesListener messagesListener) {
     _connection = connection;
@@ -85,7 +85,7 @@ class ExampleConnectionStateChangedListener implements xmpp.ConnectionStateChang
   }
 
   void onPresence(xmpp.PresenceData event) {
-    Log.d(TAG, 'presence Event from ${event.jid?.fullJid}' + ' PRESENCE: ' + event.showElement.toString());
+    Log.d(TAG, 'presence Event from ' + event.jid.fullJid + ' PRESENCE: ' + event.showElement.toString());
   }
 }
 

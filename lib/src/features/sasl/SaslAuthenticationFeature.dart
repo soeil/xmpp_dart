@@ -8,12 +8,12 @@ import 'package:xmpp_stone/src/features/sasl/ScramSaslHandler.dart';
 import '../../elements/nonzas/Nonza.dart';
 
 class SaslAuthenticationFeature extends Negotiator {
-  late Connection _connection;
+  Connection _connection;
 
   final Set<SaslMechanism> _offeredMechanisms = <SaslMechanism>{};
   final Set<SaslMechanism> _supportedMechanisms = <SaslMechanism>{};
 
-  late String _password;
+  String _password;
 
   SaslAuthenticationFeature(Connection connection, String password) {
     _password = password;
@@ -27,12 +27,8 @@ class SaslAuthenticationFeature extends Negotiator {
   // improve this
   @override
   List<Nonza> match(List<Nonza> requests) {
-    try {
-      Nonza? nonza = requests.firstWhere((element) => element.name == 'mechanisms');
-      return [nonza];
-    } catch(e) {
-      return [];
-    }
+    var nonza = requests.firstWhere((element) => element.name == 'mechanisms', orElse: () => null);
+    return nonza != null? [nonza] : [];
   }
 
   @override
@@ -44,27 +40,25 @@ class SaslAuthenticationFeature extends Negotiator {
   }
 
   void _process() {
-    AbstractSaslHandler? saslHandler;
-    try {
-      var mechanism = _supportedMechanisms.firstWhere(
-              (mch) => _offeredMechanisms.contains(mch),
-          orElse: _handleAuthNotSupported);
-      switch (mechanism) {
-        case SaslMechanism.PLAIN:
-          saslHandler = PlainSaslHandler(_connection, _password);
-          break;
-        case SaslMechanism.SCRAM_SHA_256:
-        case SaslMechanism.SCRAM_SHA_1:
-          saslHandler = ScramSaslHandler(_connection, _password, mechanism);
-          break;
-        case SaslMechanism.SCRAM_SHA_1_PLUS:
-          break;
-        case SaslMechanism.EXTERNAL:
-          break;
-        case SaslMechanism.NOT_SUPPORTED:
-          break;
-      }
-    } catch(e) {}
+    var mechanism = _supportedMechanisms.firstWhere(
+        (mch) => _offeredMechanisms.contains(mch),
+        orElse: _handleAuthNotSupported);
+    AbstractSaslHandler saslHandler;
+    switch (mechanism) {
+      case SaslMechanism.PLAIN:
+        saslHandler = PlainSaslHandler(_connection, _password);
+        break;
+      case SaslMechanism.SCRAM_SHA_256:
+      case SaslMechanism.SCRAM_SHA_1:
+        saslHandler = ScramSaslHandler(_connection, _password, mechanism);
+        break;
+      case SaslMechanism.SCRAM_SHA_1_PLUS:
+        break;
+      case SaslMechanism.EXTERNAL:
+        break;
+      case SaslMechanism.NOT_SUPPORTED:
+        break;
+    }
     if (saslHandler != null) {
       state = NegotiatorState.NEGOTIATING;
       saslHandler.start().then((result) {

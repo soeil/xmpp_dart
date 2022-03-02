@@ -18,7 +18,7 @@ class PresenceStanza extends AbstractStanza {
   }
 
   PresenceType get type {
-    var typeValue = getAttribute('type')?.value ?? '';
+    var typeValue = getAttribute('type')?.value;
     return typeFromString(typeValue);
   }
 
@@ -28,24 +28,20 @@ class PresenceStanza extends AbstractStanza {
   }
 
   PresenceShowElement get show {
-    var showValue = getChild('show')?.textValue ?? '';
+    var showValue = getChild('show')?.textValue;
     return showFromString(showValue);
   }
 
   //status with no language prefs
   String get status {
-    var statusElement;
-    try {
-      children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty);
-    } catch(e) {}
-    return statusElement.textValue ?? '';
+    var statusElement =
+        children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty, orElse: () => null);
+    return statusElement?.textValue;
   }
 
   set status(String value) {
-    var childElement;
-    try {
-      childElement = children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty);
-    } catch(e) {}
+    var childElement =
+        children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty, orElse: () => null);
     if (childElement == null) {
       var element = XmppElement();
       element.name = 'status';
@@ -57,7 +53,7 @@ class PresenceStanza extends AbstractStanza {
   }
 
   int get priority {
-    return int.tryParse(getChild('priority')?.textValue ?? '0') ?? 0;
+    return int.tryParse(getChild('priority')?.textValue);
   }
 
   set priority(int value) {
@@ -77,7 +73,7 @@ class PresenceStanza extends AbstractStanza {
         return PresenceShowElement.XA;
     }
 
-    return PresenceShowElement.AWAY;
+    return null;
   }
 
   PresenceType typeFromString(String typeString) {
@@ -98,14 +94,12 @@ class PresenceStanza extends AbstractStanza {
         return PresenceType.UNSUBSCRIBED;
     }
 
-    return PresenceType.ERROR;
+    return null;
   }
 
   void _setChildValue(String childName, String value) {
-    var childElement;
-    try {
-      childElement = children.firstWhere((element) => element.name == childName && element.attributes.isEmpty);
-    } catch(e) {}
+    var childElement =
+        children.firstWhere((element) => element.name == childName && element.attributes.isEmpty, orElse: () => null);
     if (childElement == null) {
       var element = XmppElement();
       element.name = childName;
@@ -117,10 +111,7 @@ class PresenceStanza extends AbstractStanza {
   }
 
   void _setAttributeValue(String attrName, String value) {
-    var attr;
-    try {
-      attr = attributes.firstWhere((attribute) => attribute.name == name);
-    } catch (e) {}
+    var attr = attributes.firstWhere((attribute) => attribute.name == name, orElse: () => null);
     if (attr == null) {
       var element = XmppElement();
       element.name = attrName;

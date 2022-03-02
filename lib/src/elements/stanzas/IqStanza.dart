@@ -23,7 +23,7 @@ class IqStanza extends AbstractStanza {
 enum IqStanzaType { ERROR, SET, RESULT, GET, INVALID, TIMEOUT }
 
 class IqStanzaResult {
-  IqStanzaType? type;
-  String description = '';
-  String iqStanzaId = '';
+  IqStanzaType type;
+  String description;
+  String iqStanzaId;
 }

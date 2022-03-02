@@ -1,11 +1,11 @@
 import 'package:xmpp_stone/src/data/Jid.dart';
 
 class Buddy {
-  late SubscriptionType _subscriptionType;
+  SubscriptionType _subscriptionType;
 
-  String _name = '';
+  String _name;
 
-  late Jid _accountJid;
+  Jid _accountJid;
 
   Jid get accountJid => _accountJid;
 
@@ -19,7 +19,7 @@ class Buddy {
     _subscriptionType = value;
   }
 
-  late Jid _jid;
+  Jid _jid;
 
   Jid get jid => _jid;
 
@@ -38,7 +38,7 @@ class Buddy {
     _name = value;
   }
 
-  static SubscriptionType? typeFromString(String typeString) {
+  static SubscriptionType typeFromString(String typeString) {
     switch (typeString) {
       case 'none':
         return SubscriptionType.NONE;

@@ -5,9 +5,9 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 
 abstract class AbstractStanza extends XmppElement {
-  String _id = '';
-  late Jid _fromJid;
-  late Jid _toJid;
+  String _id;
+  Jid _fromJid;
+  Jid _toJid;
 
   Jid get fromJid => _fromJid;
 

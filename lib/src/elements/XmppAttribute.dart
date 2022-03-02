@@ -1,6 +1,6 @@
 class XmppAttribute {
-  late String _name;
-  late String _value;
+  String _name;
+  String _value;
 
   String get name => _name;
 

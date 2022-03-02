@@ -2,13 +2,13 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xml/xml.dart' as xml;
 
 class XmppElement {
-  String _name = '';
+  String _name;
   String get name => _name;
   set name(String value) {
     _name = value;
   }
 
-  String _textValue = '';
+  String _textValue;
   String get textValue => _textValue;
 
   set textValue(String value) {
@@ -19,12 +19,8 @@ class XmppElement {
   List<XmppElement> get children => _children;
 
   final List<XmppAttribute> _attributes = <XmppAttribute>[];
-  XmppAttribute? getAttribute(String name) {
-    try {
-      return _attributes.firstWhere((attr) => attr.name == name);
-    } catch(e) {
-      return null;
-    }
+  XmppAttribute getAttribute(String name) {
+    return _attributes.firstWhere((attr) => attr.name == name, orElse: () => null);
   }
 
   void addAttribute(XmppAttribute attribute) {
@@ -39,12 +35,8 @@ class XmppElement {
     _children.add(element);
   }
 
-  XmppElement? getChild(String name) {
-    try {
-      return _children.firstWhere((element) => element.name == name);
-    } catch(e) {
-      return null;
-    }
+  XmppElement getChild(String name) {
+    return _children.firstWhere((element) => element.name == name, orElse: () => null);
   }
 
   String buildXmlString() {
@@ -70,7 +62,7 @@ class XmppElement {
   }
 
   String getNameSpace() {
-    return getAttribute('xmlns')?.value ?? '';
+    return getAttribute('xmlns')?.value;
   }
 
   List<XmppAttribute> get attributes => _attributes;

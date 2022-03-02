@@ -11,10 +11,10 @@ import 'package:xmpp_stone/src/features/Negotiator.dart';
 import '../elements/nonzas/Nonza.dart';
 
 class SessionInitiationNegotiator extends Negotiator {
-  late Connection _connection;
-  StreamSubscription<AbstractStanza>? subscription;
+  Connection _connection;
+  StreamSubscription<AbstractStanza> subscription;
 
-  IqStanza? sentRequest;
+  IqStanza sentRequest;
 
   SessionInitiationNegotiator(Connection connection) {
     _connection = connection;
@@ -22,12 +22,8 @@ class SessionInitiationNegotiator extends Negotiator {
   }
   @override
   List<Nonza> match(List<Nonza> requests) {
-    try {
-      Nonza? nonza = requests.firstWhere((request) => request.name == 'session');
-      return [nonza];
-    } catch(e) {
-      return [];
-    }
+    var nonza = requests.firstWhere((request) => request.name == 'session', orElse: () => null);
+    return nonza != null ? [nonza] : [];
   }
 
   @override

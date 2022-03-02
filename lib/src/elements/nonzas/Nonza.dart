@@ -5,8 +5,8 @@ import 'package:xmpp_stone/src/parser/StanzaParser.dart';
 import 'package:xml/xml.dart' as xml;
 
 class Nonza extends XmppElement {
-  late Jid _fromJid;
-  late Jid _toJid;
+  Jid _fromJid;
+  Jid _toJid;
 
   Jid get fromJid => _fromJid;
 

@@ -3,11 +3,11 @@ import '../../elements/nonzas/Nonza.dart';
 
 class Identity extends Nonza {
   String get category {
-    return getAttribute('category')?.value ?? '';
+    return getAttribute('category')?.value;
   }
 
   String get type {
-    return getAttribute('type')?.value ?? '';
+    return getAttribute('type')?.value;
   }
 
   @override

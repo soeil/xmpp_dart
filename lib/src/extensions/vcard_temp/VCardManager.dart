@@ -83,11 +83,11 @@ class VCardManager {
             } else {
               _vCards[_connection.fullJid.userAtDomain] = vCard;
             }
-            unrespondedStanza?.item2.complete(vCard);
+            unrespondedStanza.item2.complete(vCard);
           }
-        } else if (stanza.type == IqStanzaType.ERROR && stanza.getChild('vCard') != null) {
-          unrespondedStanza?.item2
-              .complete(InvalidVCard(stanza.getChild('vCard')!));
+        } else if (stanza.type == IqStanzaType.ERROR) {
+          unrespondedStanza.item2
+              .complete(InvalidVCard(stanza.getChild('vCard')));
         }
       }
     }

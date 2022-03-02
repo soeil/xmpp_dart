@@ -6,7 +6,7 @@ class IqParser {
   static const TAG = 'IqParser';
 
   static IqStanza parseIqStanza(String id, xml.XmlElement element) {
-    String typeString = element.getAttribute('type') ?? '';
+    var typeString = element.getAttribute('type');
     return IqStanza(id, _parseIqType(typeString));
   }
 

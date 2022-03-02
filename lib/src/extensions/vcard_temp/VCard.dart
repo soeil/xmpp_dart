@@ -5,9 +5,9 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 
 class VCard extends XmppElement {
-  late var _imageData;
+  var _imageData;
 
-  late img.Image _image;
+  img.Image _image;
 
   VCard(XmppElement element) {
     if (element != null) {
@@ -18,71 +18,74 @@ class VCard extends XmppElement {
     _parseImage();
   }
 
-  String? get fullName => getChild('FN')?.textValue;
+  String get fullName => getChild('FN')?.textValue;
 
-  String? get familyName => getChild('N')?.getChild('FAMILY')?.textValue;
+  String get familyName => getChild('N')?.getChild('FAMILY')?.textValue;
 
-  String? get givenName => getChild('N')?.getChild('GIVEN')?.textValue;
+  String get givenName => getChild('N')?.getChild('GIVEN')?.textValue;
 
-  String? get prefixName => getChild('N')?.getChild('PREFIX')?.textValue;
+  String get prefixName => getChild('N')?.getChild('PREFIX')?.textValue;
 
-  String? get nickName => getChild('NICKNAME')?.textValue;
+  String get nickName => getChild('NICKNAME')?.textValue;
 
-  String? get url => getChild('URL')?.textValue;
+  String get url => getChild('URL')?.textValue;
 
-  String? get bDay => getChild('BDAY')?.textValue;
+  String get bDay => getChild('BDAY')?.textValue;
 
-  String? get organisationName => getChild('ORG')?.getChild('ORGNAME')?.textValue;
+  String get organisationName =>
+      getChild('ORG')?.getChild('ORGNAME')?.textValue;
 
-  String? get organizationUnit => getChild('ORG')?.getChild('ORGUNIT')?.textValue ?? '';
+  String get organizationUnit =>
+      getChild('ORG')?.getChild('ORGUNIT')?.textValue;
 
-  String? get title => getChild('TITLE')?.textValue ?? '';
+  String get title => getChild('TITLE')?.textValue;
 
-  String? get role => getChild('ROLE')?.textValue ?? '';
+  String get role => getChild('ROLE')?.textValue;
 
-  String? get jabberId => getChild('JABBERID')?.textValue ?? '';
+  String get jabberId => getChild('JABBERID')?.textValue;
 
-  String? getItem(String itemName) => getChild(itemName)?.textValue ?? '';
+  String getItem(String itemName) => getChild(itemName)?.textValue;
 
   dynamic get imageData => _imageData;
 
   img.Image get image => _image;
 
-  String? get imageType => getChild('PHOTO')?.getChild('TYPE')?.textValue ?? '';
+  String get imageType => getChild('PHOTO')?.getChild('TYPE')?.textValue;
 
   List<PhoneItem> get phones {
     var homePhones = <PhoneItem>[];
-    try {
-      children.where((element) => (element.name == 'TEL' && element.getChild('HOME') != null)).forEach((element) {
-        var typeString = element.children.firstWhere((element) => (element.name != 'HOME' && element.name != 'NUMBER'));
-        if (typeString != null) {
-          var type = getPhoneTypeFromString(typeString.name);
-          var number = element.getChild('NUMBER')?.textValue ?? '';
-          if (number != null) {
-            homePhones.add(PhoneItem(type, number));
-          }
+    children
+        .where((element) =>
+            (element.name == 'TEL' && element.getChild('HOME') != null))
+        .forEach((element) {
+      var typeString = element.children.firstWhere(
+          (element) => (element.name != 'HOME' && element.name != 'NUMBER'),
+          orElse: () => null);
+      if (typeString != null) {
+        var type = getPhoneTypeFromString(typeString.name);
+        var number = element.getChild('NUMBER')?.textValue;
+        if (number != null) {
+          homePhones.add(PhoneItem(type, number));
         }
-      });
-    } catch (e) {}
+      }
+    });
     return homePhones;
   }
 
-  String? get emailHome {
-    try {
-      var element = children.firstWhere((element) => (element.name == 'EMAIL' && element.getChild('HOME') != null));
-      return element.getChild('USERID')?.textValue;
-    } catch(e) {
-      return null;
-    }
+  String get emailHome {
+    var element = children.firstWhere(
+        (element) =>
+            (element.name == 'EMAIL' && element.getChild('HOME') != null),
+        orElse: () => null);
+    return element?.getChild('USERID')?.textValue;
   }
 
-  String? get emailWork {
-    try {
-      var element = children.firstWhere((element) => (element.name == 'EMAIL' && element.getChild('WORK') != null));
-      return element.getChild('USERID')?.textValue;
-    } catch(e) {
-      return null;
-    }
+  String get emailWork {
+    var element = children.firstWhere(
+        (element) =>
+            (element.name == 'EMAIL' && element.getChild('WORK') != null),
+        orElse: () => null);
+    return element?.getChild('USERID')?.textValue;
   }
 
   static PhoneType getPhoneTypeFromString(String phoneTypeString) {
@@ -125,12 +128,10 @@ class VCard extends XmppElement {
   }
 
   void _parseImage() {
-    var base64Image = getChild('PHOTO')?.getChild('BINVAL')?.textValue ?? '';
+    var base64Image = getChild('PHOTO')?.getChild('BINVAL')?.textValue;
     if (base64Image != null) {
       _imageData = base64.decode(base64Image);
-      if (img.decodeImage(_imageData) != null) {
-        _image = img.decodeImage(_imageData)!;
-      }
+      _image = img.decodeImage(_imageData);
     }
   }
 }
@@ -146,4 +147,17 @@ class PhoneItem {
   PhoneItem(this.type, this.phone);
 }
 
-enum PhoneType { VOICE, FAX, PAGER, MSG, CELL, VIDEO, BBS, MODEM, ISDN, PCS, PREF, OTHER }
+enum PhoneType {
+  VOICE,
+  FAX,
+  PAGER,
+  MSG,
+  CELL,
+  VIDEO,
+  BBS,
+  MODEM,
+  ISDN,
+  PCS,
+  PREF,
+  OTHER
+}
