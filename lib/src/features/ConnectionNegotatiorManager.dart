@@ -132,13 +132,17 @@ class ConnectionNegotiatorManager {
 
   NegotiatorWithSupportedNonzas? pickNextNegotiator() {
     if (waitingNegotiators.isEmpty) return null;
-    var negotiatorWithData = waitingNegotiators.firstWhere((element) {
-      Log.d(TAG,
-          'Found matching negotiator ${element.negotiator.isReady().toString()}');
-      return element.negotiator.isReady();
-    });
-    waitingNegotiators.remove(negotiatorWithData);
-    return negotiatorWithData;
+    try {
+      var negotiatorWithData = waitingNegotiators.firstWhere((element) {
+        Log.d(TAG,
+            'Found matching negotiator ${element.negotiator.isReady().toString()}');
+        return element.negotiator.isReady();
+      });
+      waitingNegotiators.remove(negotiatorWithData);
+      return negotiatorWithData;
+    } catch(e) {
+      return null;
+    }
   }
 
   void addFeatures(List<Feature> supportedFeatures) {

@@ -32,11 +32,9 @@ class VCard extends XmppElement {
 
   String? get bDay => getChild('BDAY')?.textValue;
 
-  String? get organisationName =>
-      getChild('ORG')?.getChild('ORGNAME')?.textValue;
+  String? get organisationName => getChild('ORG')?.getChild('ORGNAME')?.textValue;
 
-  String? get organizationUnit =>
-      getChild('ORG')?.getChild('ORGUNIT')?.textValue ?? '';
+  String? get organizationUnit => getChild('ORG')?.getChild('ORGUNIT')?.textValue ?? '';
 
   String? get title => getChild('TITLE')?.textValue ?? '';
 
@@ -54,35 +52,37 @@ class VCard extends XmppElement {
 
   List<PhoneItem> get phones {
     var homePhones = <PhoneItem>[];
-    children
-        .where((element) =>
-            (element.name == 'TEL' && element.getChild('HOME') != null))
-        .forEach((element) {
-      var typeString = element.children.firstWhere(
-          (element) => (element.name != 'HOME' && element.name != 'NUMBER'));
-      if (typeString != null) {
-        var type = getPhoneTypeFromString(typeString.name);
-        var number = element.getChild('NUMBER')?.textValue ?? '';
-        if (number != null) {
-          homePhones.add(PhoneItem(type, number));
+    try {
+      children.where((element) => (element.name == 'TEL' && element.getChild('HOME') != null)).forEach((element) {
+        var typeString = element.children.firstWhere((element) => (element.name != 'HOME' && element.name != 'NUMBER'));
+        if (typeString != null) {
+          var type = getPhoneTypeFromString(typeString.name);
+          var number = element.getChild('NUMBER')?.textValue ?? '';
+          if (number != null) {
+            homePhones.add(PhoneItem(type, number));
+          }
         }
-      }
-    });
+      });
+    } catch (e) {}
     return homePhones;
   }
 
   String? get emailHome {
-    var element = children.firstWhere(
-        (element) =>
-            (element.name == 'EMAIL' && element.getChild('HOME') != null));
-    return element.getChild('USERID')?.textValue ?? '';
+    try {
+      var element = children.firstWhere((element) => (element.name == 'EMAIL' && element.getChild('HOME') != null));
+      return element.getChild('USERID')?.textValue;
+    } catch(e) {
+      return null;
+    }
   }
 
   String? get emailWork {
-    var element = children.firstWhere(
-        (element) =>
-            (element.name == 'EMAIL' && element.getChild('WORK') != null));
-    return element.getChild('USERID')?.textValue ?? '';
+    try {
+      var element = children.firstWhere((element) => (element.name == 'EMAIL' && element.getChild('WORK') != null));
+      return element.getChild('USERID')?.textValue;
+    } catch(e) {
+      return null;
+    }
   }
 
   static PhoneType getPhoneTypeFromString(String phoneTypeString) {
@@ -146,17 +146,4 @@ class PhoneItem {
   PhoneItem(this.type, this.phone);
 }
 
-enum PhoneType {
-  VOICE,
-  FAX,
-  PAGER,
-  MSG,
-  CELL,
-  VIDEO,
-  BBS,
-  MODEM,
-  ISDN,
-  PCS,
-  PREF,
-  OTHER
-}
+enum PhoneType { VOICE, FAX, PAGER, MSG, CELL, VIDEO, BBS, MODEM, ISDN, PCS, PREF, OTHER }

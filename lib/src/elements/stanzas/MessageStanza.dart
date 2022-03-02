@@ -19,7 +19,11 @@ class MessageStanza extends AbstractStanza {
   }
 
   String get body {
-    return children.firstWhere((child) => (child.name == 'body' && child.attributes.isEmpty)).textValue;
+    try {
+      return children.firstWhere((child) => (child.name == 'body' && child.attributes.isEmpty)).textValue;
+    } catch (e) {
+      return '';
+    }
   }
 
   set body(String value) {
@@ -29,7 +33,13 @@ class MessageStanza extends AbstractStanza {
     addChild(element);
   }
 
-  String get subject => children.firstWhere((child) => (child.name == 'subject')).textValue;
+  String get subject {
+    try {
+      return children.firstWhere((child) => (child.name == 'subject')).textValue;
+    } catch(e) {
+      return '';
+    }
+  }
 
   set subject(String value) {
     var element = XmppElement();
@@ -38,7 +48,13 @@ class MessageStanza extends AbstractStanza {
     addChild(element);
   }
 
-  String get thread => children.firstWhere((child) => (child.name == 'thread')).textValue;
+  String get thread {
+    try {
+      return children.firstWhere((child) => (child.name == 'thread')).textValue
+    } catch(e) {
+      return '';
+    }
+  };
 
   set thread(String value) {
     var element = XmppElement();
