@@ -50,11 +50,11 @@ class MessageStanza extends AbstractStanza {
 
   String get thread {
     try {
-      return children.firstWhere((child) => (child.name == 'thread')).textValue
+      return children.firstWhere((child) => (child.name == 'thread')).textValue;
     } catch(e) {
       return '';
     }
-  };
+  }
 
   set thread(String value) {
     var element = XmppElement();
