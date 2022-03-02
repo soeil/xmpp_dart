@@ -28,7 +28,7 @@ class MAMNegotiator extends Negotiator {
 
   IqStanza? _myUnrespondedIqStanza;
 
-  StreamSubscription<AbstractStanza>? _subscription;
+  StreamSubscription<AbstractStanza?>? _subscription;
 
   final Connection _connection;
 
@@ -82,7 +82,7 @@ class MAMNegotiator extends Negotiator {
     _connection.writeStanza(iqStanza);
   }
 
-  void checkStanzas(AbstractStanza stanza) {
+  void checkStanzas(AbstractStanza? stanza) {
     if (stanza is IqStanza && stanza.id == _myUnrespondedIqStanza?.id) {
       var x = stanza.getChild('query')?.getChild('x');
       if (x != null) {

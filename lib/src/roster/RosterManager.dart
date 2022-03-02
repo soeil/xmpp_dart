@@ -22,7 +22,7 @@ class RosterManager {
     return manager;
   }
 
-  final Map<String, Tuple2<IqStanza, Completer?>> _myUnrespondedIqStanzas = <String, Tuple2<IqStanza, Completer>>{};
+  final Map<String, Tuple2<IqStanza, Completer?>> _myUnrespondedIqStanzas = <String, Tuple2<IqStanza, Completer?>>{};
 
   final StreamController<List<Buddy>> _rosterController = StreamController<List<Buddy>>.broadcast();
 
@@ -48,8 +48,8 @@ class RosterManager {
     return _rosterMap.values.toList();
   }
 
-  Future<IqStanzaResult> updateRosterItem(Buddy rosterItem) {
-    return addRosterItem(rosterItem);
+  Future<IqStanzaResult> updateRosterItem(Buddy rosterItem) async {
+    return await addRosterItem(rosterItem);
   }
 
   Future<IqStanzaResult> addRosterItem(Buddy rosterItem) {

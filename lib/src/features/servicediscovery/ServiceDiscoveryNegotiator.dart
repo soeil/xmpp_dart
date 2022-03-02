@@ -31,7 +31,7 @@ class ServiceDiscoveryNegotiator extends Negotiator {
 
   IqStanza? fullRequestStanza;
 
-  StreamSubscription<AbstractStanza>? subscription;
+  StreamSubscription<AbstractStanza?>? subscription;
 
   final Connection _connection;
 
@@ -52,7 +52,7 @@ class ServiceDiscoveryNegotiator extends Negotiator {
     return _errorStreamController.stream;
   }
 
-  void _parseStanza(AbstractStanza stanza) {
+  void _parseStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       var idValue = stanza.getAttribute('id')?.value;
       if (idValue != null &&

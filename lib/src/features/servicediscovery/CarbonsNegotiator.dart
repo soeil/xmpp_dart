@@ -34,7 +34,7 @@ class CarbonsNegotiator extends Negotiator {
 
   bool enabled = false;
 
-  StreamSubscription<AbstractStanza>? _subscription;
+  StreamSubscription<AbstractStanza?>? _subscription;
   IqStanza? _myUnrespondedIqStanza;
 
   CarbonsNegotiator(this._connection) {
@@ -69,7 +69,7 @@ class CarbonsNegotiator extends Negotiator {
     _connection.writeStanza(iqStanza);
   }
 
-  void checkStanzas(AbstractStanza stanza) {
+  void checkStanzas(AbstractStanza? stanza) {
     if (stanza is IqStanza && stanza.id == _myUnrespondedIqStanza?.id) {
       enabled = stanza.type == IqStanzaType.RESULT;
       state = NegotiatorState.DONE;

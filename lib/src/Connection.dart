@@ -82,7 +82,7 @@ class Connection {
 
   bool authenticated = false;
 
-  final StreamController<AbstractStanza> _inStanzaStreamController =
+  final StreamController<AbstractStanza?> _inStanzaStreamController =
       StreamController.broadcast();
 
   final StreamController<AbstractStanza> _outStanzaStreamController =
@@ -97,7 +97,7 @@ class Connection {
   final StreamController<XmppConnectionState> _connectionStateStreamController =
       StreamController.broadcast();
 
-  Stream<AbstractStanza> get inStanzasStream {
+  Stream<AbstractStanza?> get inStanzasStream {
     return _inStanzaStreamController.stream;
   }
 
@@ -181,14 +181,14 @@ xml:lang='en'
     return response1;
   }
 
-  void reconnect() {
+  Future<void> reconnect() async {
     if (_state == XmppConnectionState.ForcefullyClosed) {
       setState(XmppConnectionState.Reconnecting);
-      openSocket();
+      await openSocket();
     }
   }
 
-  void connect() {
+  Future<void> connect() async {
     if (_state == XmppConnectionState.Closing) {
       _state = XmppConnectionState.WouldLikeToOpen;
     }
@@ -196,7 +196,7 @@ xml:lang='en'
       _state = XmppConnectionState.Idle;
     }
     if (_state == XmppConnectionState.Idle) {
-      openSocket();
+      await openSocket();
     }
   }
 
@@ -304,7 +304,7 @@ xml:lang='en'
           .whereType<xml.XmlElement>()
           .where((element) => stanzaMatcher(element))
           .map((xmlElement) => StanzaParser.parseStanza(xmlElement))
-          .forEach((stanza) => _inStanzaStreamController.add(stanza!));
+          .forEach((stanza) => _inStanzaStreamController.add(stanza));
 
       xmlResponse?.descendants
           .whereType<xml.XmlElement>()
@@ -394,7 +394,7 @@ xml:lang='en'
     });
   }
 
-  void fireNewStanzaEvent(AbstractStanza stanza) {
+  void fireNewStanzaEvent(AbstractStanza? stanza) {
     _inStanzaStreamController.add(stanza);
   }
 

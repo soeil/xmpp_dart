@@ -13,7 +13,7 @@ import '../elements/nonzas/Nonza.dart';
 
 class BindingResourceConnectionNegotiator extends Negotiator {
   late Connection _connection;
-  StreamSubscription<AbstractStanza>? subscription;
+  StreamSubscription<AbstractStanza?>? subscription;
   static const String BIND_NAME = 'bind';
   static const String BIND_ATTRIBUTE = 'urn:ietf:params:xml:ns:xmpp-bind';
 
@@ -37,7 +37,7 @@ class BindingResourceConnectionNegotiator extends Negotiator {
     }
   }
 
-  void parseStanza(AbstractStanza stanza) {
+  void parseStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       var element = stanza.getChild(BIND_NAME);
       var jidValue = element?.getChild('jid')?.textValue;

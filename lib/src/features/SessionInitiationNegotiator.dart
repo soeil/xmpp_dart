@@ -13,7 +13,7 @@ import '../elements/nonzas/Nonza.dart';
 
 class SessionInitiationNegotiator extends Negotiator {
   late Connection _connection;
-  StreamSubscription<AbstractStanza>? subscription;
+  StreamSubscription<AbstractStanza?>? subscription;
 
   IqStanza? sentRequest;
 
@@ -36,7 +36,7 @@ class SessionInitiationNegotiator extends Negotiator {
     }
   }
 
-  void parseStanza(AbstractStanza stanza) {
+  void parseStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       var idValue = stanza.getAttribute('id')?.value;
       if (idValue != null &&

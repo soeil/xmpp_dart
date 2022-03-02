@@ -34,7 +34,7 @@ class StreamManagementModule extends Negotiator {
 
   StreamState streamState = StreamState();
   late Connection _connection;
-  StreamSubscription<AbstractStanza>? inStanzaSubscription;
+  StreamSubscription<AbstractStanza?>? inStanzaSubscription;
   StreamSubscription<AbstractStanza>? outStanzaSubscription;
   StreamSubscription<Nonza>? inNonzaSubscription;
 
@@ -146,7 +146,7 @@ class StreamManagementModule extends Negotiator {
     streamState.nonConfirmedSentStanzas.addLast(stanza);
   }
 
-  void parseInStanza(AbstractStanza stanza) {
+  void parseInStanza(AbstractStanza? stanza) {
     streamState.lastReceivedStanza++;
   }
 
