@@ -104,7 +104,7 @@ class RosterManager {
     }
   }
 
-  void _processStanza(AbstractStanza stanza) {
+  void _processStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       if (_myUnrespondedIqStanzas[stanza.id] != null) {
         var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
