@@ -18,8 +18,8 @@ abstract class PresenceApi {
 }
 
 class PresenceData {
-  PresenceShowElement showElement;
-  String status;
+  PresenceShowElement? showElement;
+  String? status;
   Jid? jid; // if Jid is Null or self jid its self presence
   PresenceData(this.showElement, this.status, this.jid);
 }
