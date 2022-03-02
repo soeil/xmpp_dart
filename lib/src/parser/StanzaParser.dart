@@ -23,6 +23,7 @@ class StanzaParser {
     String? id = element.getAttribute('id');
     if (id == null) {
       Log.d(TAG, 'No id found for stanza ${element.toString()}');
+      return null;
     }
 
     if (element.name.local == 'iq') {
