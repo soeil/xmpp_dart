@@ -32,7 +32,7 @@ class ReconnectionManager {
       timeOutInMs = initialTimeout;
       counter = 0;
       if (timer != null) {
-        timer!.cancel();
+        timer?.cancel();
         timer = null;
       }
     }
@@ -40,7 +40,7 @@ class ReconnectionManager {
 
   void handleReconnection() {
     if (timer != null) {
-      timer!.cancel();
+      timer?.cancel();
     }
     if (counter < totalReconnections) {
       timer = Timer(Duration(milliseconds: timeOutInMs), _connection.reconnect);
@@ -48,7 +48,9 @@ class ReconnectionManager {
       Log.d(TAG, 'TimeOut is: $timeOutInMs reconnection counter $counter');
       counter++;
     } else {
-      _connection.close();
+      try {
+        _connection.close();
+      } catch (e) {}
     }
   }
 }
