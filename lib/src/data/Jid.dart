@@ -54,11 +54,15 @@ class Jid {
     if (fullJid == null) {
       return InvalidJid();
     }
-    Iterable<Match> matches = exp.allMatches(fullJid);
-    var match = matches.first;
-    if (match != null) {
-      return Jid(match[2] ?? '', match[3] ?? '', match[5] ?? '');
-    } else {
+    try {
+      Iterable<Match> matches = exp.allMatches(fullJid);
+      var match = matches.first;
+      if (match != null) {
+        return Jid(match[2] ?? '', match[3] ?? '', match[5] ?? '');
+      } else {
+        return InvalidJid();
+      }
+    } catch(e) {
       return InvalidJid();
     }
   }
